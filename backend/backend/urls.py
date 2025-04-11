@@ -15,9 +15,26 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from .views import home_redirect
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import UzytkownikViewSet
+from django.http import HttpResponse
+
+def home_view(request):
+    return HttpResponse("""
+        <p>Dostępne endpointy:</p>
+        <ul>
+            <li><a href="/api/users/">/api/users/</a> - Lista użytkowników</li>
+            <li><a href="/admin/">/admin/</a> - Panel administracyjny</li>
+        </ul>
+    """)
+
+router = DefaultRouter()
+router.register(r'users', UzytkownikViewSet, basename='uzytkownik')
 urlpatterns = [
+    path('', home_view, name='home'),
     path('admin/', admin.site.urls),
-    path('', home_redirect),
+    path('api/', include(router.urls)),
+
 ]
+
