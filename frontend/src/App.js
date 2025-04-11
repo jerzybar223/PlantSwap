@@ -1,91 +1,240 @@
-import React, { useState, useEffect } from 'react';
-import './App.css';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
 
 function App() {
+  const [view, setView] = useState("login");
+  const [token, setToken] = useState(localStorage.getItem("token"));
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [endpointInfo, setEndpointInfo] = useState(null);
+
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    password2: "",
+    location: "",
+  });
 
   useEffect(() => {
-    const testEndpoint = async () => {
-      try {
-        // Test 1: Sprawdź czy backend odpowiada
-        const baseResponse = await axios.get('http://localhost:8000/');
-        console.log('Base response:', baseResponse.data);
-
-        // Test 2: Sprawdź czy API root istnieje
-        try {
-          const apiRootResponse = await axios.get('http://localhost:8000/api/');
-          console.log('API root response:', apiRootResponse.data);
-        } catch (apiRootError) {
-          console.log('API root nie odpowiada - to może być normalne');
-        }
-
-        // Test 3: Spróbuj pobrać użytkownika
-        const userResponse = await axios.get('http://localhost:8000/api/users/1/');
-        setUser(userResponse.data);
-      } catch (err) {
-        console.error('Full error:', err);
-        console.error('Error response:', err.response);
-
-        setError({
-          message: err.message,
-          status: err.response?.status,
-          data: err.response?.data,
-          config: {
-            url: err.config?.url,
-            method: err.config?.method
-          }
+    if (token) {
+      fetch("http://localhost:8000/api/users/current_user/", {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      })
+        .then((res) => {
+          if (res.status === 401) throw new Error("Unauthorized");
+          return res.json();
+        })
+        .then((data) => {
+          setUser(data);
+          setView("dashboard");
+        })
+        .catch(() => {
+          setToken(null);
+          localStorage.removeItem("token");
         });
-      } finally {
-        setLoading(false);
-      }
-    };
+    }
+  }, [token]);
 
-    testEndpoint();
-  }, []);
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  if (loading) {
-    return <div className="App">Ładowanie danych...</div>;
+  const handleRegister = async (e) => {
+  e.preventDefault();
+
+  const { username, email, password, password2, location } = formData;
+
+  if (!username || !email || !password || !password2 || !location) {
+    alert("Wszystkie pola są wymagane.");
+    return;
   }
 
-  if (error) {
-    return (
-      <div className="App" style={{ textAlign: 'left', padding: '20px' }}>
-        <h1>Błąd połączenia z API</h1>
-        <h2>Szczegóły błędu:</h2>
-        <p><strong>URL:</strong> {error.config?.url}</p>
-        <p><strong>Metoda:</strong> {error.config?.method}</p>
-        <p><strong>Status:</strong> {error.status || 'Brak odpowiedzi'}</p>
-        <p><strong>Komunikat:</strong> {error.message}</p>
-
-        {error.data && (
-          <div>
-            <h3>Odpowiedź serwera:</h3>
-            <pre>{JSON.stringify(error.data, null, 2)}</pre>
-          </div>
-        )}
-
-      </div>
-    );
+  if (password !== password2) {
+    alert("Hasła muszą być takie same.");
+    return;
   }
+
+  const res = await fetch("http://localhost:8000/api/register/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username,
+      email,
+      password,
+      password2, // <-- TO BYŁO POMIJANE, MUSI BYĆ!
+      location,
+    }),
+  });
+
+  let data;
+  try {
+    data = await res.json();
+  } catch (err) {
+    const text = await res.text();
+    alert("Błąd odpowiedzi serwera: " + text);
+    return;
+  }
+
+  if (res.ok) {
+    setToken(data.token);
+    localStorage.setItem("token", data.token);
+    setUser(data.user);
+    setView("dashboard");
+  } else {
+    alert("Rejestracja nieudana: " + JSON.stringify(data));
+  }
+};
+
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    if (!formData.username || !formData.password) {
+      alert("Podaj nazwę użytkownika i hasło.");
+      return;
+    }
+
+    const res = await fetch("http://localhost:8000/api/login/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: formData.username,
+        password: formData.password,
+      }),
+    });
+
+    let data;
+    try {
+      data = await res.json();
+    } catch (err) {
+      const text = await res.text();
+      alert("Błąd odpowiedzi serwera: " + text);
+      return;
+    }
+
+    if (res.ok) {
+      setToken(data.token);
+      localStorage.setItem("token", data.token);
+      setUser(data.user);
+      setView("dashboard");
+    } else {
+      alert("Logowanie nieudane: " + JSON.stringify(data));
+    }
+  };
+
+  const handleLogout = () => {
+    setToken(null);
+    setUser(null);
+    localStorage.removeItem("token");
+    setFormData({
+      username: "",
+      email: "",
+      password: "",
+      password2: "",
+      location: "",
+    });
+    setView("login");
+  };
 
   return (
-    <div className="App">
-      <header className="Aplikacja">
-        <h1>Testowanie API</h1>
-        {user ? (
-          <div>
-            <h2>Użytkownik o ID=1:</h2>
-            <p><strong>Nazwa:</strong> {user.username}</p>
-            <p><strong>email:</strong> {user.email}</p>
-          </div>
-        ) : (
-          <p>Użytkownik został pobrany, ale dane są puste</p>
-        )}
-      </header>
+    <div style={{ padding: "2rem" }}>
+      {view === "login" && (
+        <form onSubmit={handleLogin}>
+          <h2>Logowanie</h2>
+          <input
+            type="text"
+            name="username"
+            placeholder="Nazwa użytkownika"
+            value={formData.username}
+            onChange={handleChange}
+            required
+          />
+          <br />
+          <input
+            type="password"
+            name="password"
+            placeholder="Hasło"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+          <br />
+          <button type="submit">Zaloguj się</button>
+          <p>
+            Nie masz konta?{" "}
+            <button type="button" onClick={() => setView("register")}>
+              Zarejestruj się
+            </button>
+          </p>
+        </form>
+      )}
+
+      {view === "register" && (
+        <form onSubmit={handleRegister}>
+          <h2>Rejestracja</h2>
+          <input
+            type="text"
+            name="username"
+            placeholder="Nazwa użytkownika"
+            value={formData.username}
+            onChange={handleChange}
+            required
+          />
+          <br />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+          <br />
+          <input
+            type="password"
+            name="password"
+            placeholder="Hasło"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+          <br />
+          <input
+            type="password"
+            name="password2"
+            placeholder="Powtórz hasło"
+            value={formData.password2}
+            onChange={handleChange}
+            required
+          />
+          <br />
+          <input
+            type="text"
+            name="location"
+            placeholder="Lokalizacja"
+            value={formData.location}
+            onChange={handleChange}
+            required
+          />
+          <br />
+          <button type="submit">Zarejestruj się</button>
+          <p>
+            Masz już konto?{" "}
+            <button type="button" onClick={() => setView("login")}>
+              Zaloguj się
+            </button>
+          </p>
+        </form>
+      )}
+
+      {view === "dashboard" && user && (
+        <div>
+          <h2>Witaj, {user.username}!</h2>
+          <p>Email: {user.email}</p>
+          <p>Lokalizacja: {user.location || "Brak"}</p>
+          <p>Ostatnia aktywność: {user.last_activity}</p>
+          <button onClick={handleLogout}>Wyloguj się</button>
+        </div>
+      )}
     </div>
   );
 }

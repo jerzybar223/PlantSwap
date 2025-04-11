@@ -17,8 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import UzytkownikViewSet
 from django.http import HttpResponse
+from .views import UzytkownikViewSet, RegistrationView
+from rest_framework.authtoken.views import obtain_auth_token
 
 def home_view(request):
     return HttpResponse("""
@@ -35,6 +36,12 @@ urlpatterns = [
     path('', home_view, name='home'),
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+
+    path('api/register/', RegistrationView.as_view(), name='register'),
+
+    path('api/login/', obtain_auth_token, name='login'),
+
+
 
 ]
 
