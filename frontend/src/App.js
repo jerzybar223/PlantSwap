@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
+import LoginPage from "./components/LoginPage";
+import RegisterPage from "./components/RegisterPage";
+import UserProfile from "./components/UserProfile";
 
 function App() {
-  const [view, setView] = useState("login");
+  const [view, setView] = useState("home");
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [user, setUser] = useState(null);
-
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -16,9 +18,7 @@ function App() {
   useEffect(() => {
     if (token) {
       fetch("http://localhost:8000/api/users/current_user/", {
-        headers: {
-          Authorization: `Token ${token}`,
-        },
+        headers: { Authorization: `Token ${token}` },
       })
         .then((res) => {
           if (res.status === 401) throw new Error("Unauthorized");
@@ -39,51 +39,43 @@ function App() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleRegister = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    const { username, email, password, password2, location } = formData;
 
-  const { username, email, password, password2, location } = formData;
+    if (!username || !email || !password || !password2 || !location) {
+      alert("Wszystkie pola są wymagane.");
+      return;
+    }
 
-  if (!username || !email || !password || !password2 || !location) {
-    alert("Wszystkie pola są wymagane.");
-    return;
-  }
+    if (password !== password2) {
+      alert("Hasła muszą być takie same.");
+      return;
+    }
 
-  if (password !== password2) {
-    alert("Hasła muszą być takie same.");
-    return;
-  }
+    const res = await fetch("http://localhost:8000/api/register/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email, password, password2, location }),
+    });
 
-  const res = await fetch("http://localhost:8000/api/register/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      username,
-      email,
-      password,
-      password2, // <-- TO BYŁO POMIJANE, MUSI BYĆ!
-      location,
-    }),
-  });
+    let data;
+    try {
+      data = await res.json();
+    } catch (err) {
+      const text = await res.text();
+      alert("Błąd odpowiedzi serwera: " + text);
+      return;
+    }
 
-  let data;
-  try {
-    data = await res.json();
-  } catch (err) {
-    const text = await res.text();
-    alert("Błąd odpowiedzi serwera: " + text);
-    return;
-  }
-
-  if (res.ok) {
-    setToken(data.token);
-    localStorage.setItem("token", data.token);
-    setUser(data.user);
-    setView("dashboard");
-  } else {
-    alert("Rejestracja nieudana: " + JSON.stringify(data));
-  }
-};
-
+    if (res.ok) {
+      setToken(data.token);
+      localStorage.setItem("token", data.token);
+      setUser(data.user);
+      setView("dashboard");
+    } else {
+      alert("Rejestracja nieudana: " + JSON.stringify(data));
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -132,108 +124,41 @@ function App() {
       password2: "",
       location: "",
     });
-    setView("login");
+    setView("home");
   };
 
   return (
     <div style={{ padding: "2rem" }}>
+      {view === "home" && (
+        <div>
+          <h1>Witamy w naszej aplikacji!</h1>
+          <button onClick={() => setView("login")}>Zaloguj się</button>{" "}
+          <button onClick={() => setView("register")}>Zarejestruj się</button>
+        </div>
+      )}
+
       {view === "login" && (
-        <form onSubmit={handleLogin}>
-          <h2>Logowanie</h2>
-          <input
-            type="text"
-            name="username"
-            placeholder="Nazwa użytkownika"
-            value={formData.username}
-            onChange={handleChange}
-            required
-          />
-          <br />
-          <input
-            type="password"
-            name="password"
-            placeholder="Hasło"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-          <br />
-          <button type="submit">Zaloguj się</button>
-          <p>
-            Nie masz konta?{" "}
-            <button type="button" onClick={() => setView("register")}>
-              Zarejestruj się
-            </button>
-          </p>
-        </form>
+        <LoginPage
+          formData={formData}
+          onChange={handleChange}
+          onLogin={handleLogin}
+          switchToRegister={() => setView("register")}
+          backToHome={() => setView("home")}
+        />
       )}
 
       {view === "register" && (
-        <form onSubmit={handleRegister}>
-          <h2>Rejestracja</h2>
-          <input
-            type="text"
-            name="username"
-            placeholder="Nazwa użytkownika"
-            value={formData.username}
-            onChange={handleChange}
-            required
-          />
-          <br />
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-          <br />
-          <input
-            type="password"
-            name="password"
-            placeholder="Hasło"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-          <br />
-          <input
-            type="password"
-            name="password2"
-            placeholder="Powtórz hasło"
-            value={formData.password2}
-            onChange={handleChange}
-            required
-          />
-          <br />
-          <input
-            type="text"
-            name="location"
-            placeholder="Lokalizacja"
-            value={formData.location}
-            onChange={handleChange}
-            required
-          />
-          <br />
-          <button type="submit">Zarejestruj się</button>
-          <p>
-            Masz już konto?{" "}
-            <button type="button" onClick={() => setView("login")}>
-              Zaloguj się
-            </button>
-          </p>
-        </form>
+        <RegisterPage
+          formData={formData}
+          onChange={handleChange}
+          onRegister={handleRegister}
+          switchToLogin={() => setView("login")}
+          backToHome={() => setView("home")}
+        />
       )}
 
       {view === "dashboard" && user && (
-        <div>
-          <h2>Witaj, {user.username}!</h2>
-          <p>Email: {user.email}</p>
-          <p>Lokalizacja: {user.location || "Brak"}</p>
-          <p>Ostatnia aktywność: {user.last_activity}</p>
-          <button onClick={handleLogout}>Wyloguj się</button>
-        </div>
+        <UserProfile user={user} onLogout={handleLogout} />
       )}
     </div>
   );
