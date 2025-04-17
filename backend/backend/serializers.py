@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Uzytkownik
+from .models import Uzytkownik, Plant, Swap
 
 class UzytkownikSerializer(serializers.ModelSerializer):
     class Meta:
@@ -36,3 +36,25 @@ class RegisterSerializer(serializers.ModelSerializer):
             location=validated_data.get('location', ''),
             photo_url=validated_data.get('photo_url', '')
         )
+
+
+class PlantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plant
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'last_updated', 'user']
+
+
+class SwapSerializer(serializers.ModelSerializer):
+    offered_plant_name = serializers.SerializerMethodField()
+    requested_plant_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Swap
+        fields = '__all__'
+
+    def get_offered_plant_name(self, obj):
+        return obj.offered_plant.name if obj.offered_plant else None
+
+    def get_requested_plant_name(self, obj):
+        return obj.requested_plant.name if obj.requested_plant else None

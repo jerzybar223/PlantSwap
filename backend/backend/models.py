@@ -46,3 +46,22 @@ class Uzytkownik(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         db_table = 'users'
+
+class Plant(models.Model):
+    user = models.ForeignKey(Uzytkownik, on_delete=models.CASCADE, related_name='plants')
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+    photo_url = models.TextField(blank=True, null=True)
+    is_available = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    last_updated = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.name
+
+
+class Swap(models.Model):
+    offered_plant = models.ForeignKey(Plant, on_delete=models.CASCADE, related_name='offered_swaps')
+    requested_plant = models.ForeignKey(Plant, on_delete=models.CASCADE, related_name='requested_swaps')
+    status = models.CharField(max_length=20, default='pending')  # pending / accepted / rejected
+    created_at = models.DateTimeField(default=timezone.now)

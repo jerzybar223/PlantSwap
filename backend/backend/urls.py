@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from django.http import HttpResponse
-from .views import UzytkownikViewSet, RegistrationView
+from .views import UzytkownikViewSet, RegistrationView,  PlantViewSet, SwapViewSet
 from rest_framework.authtoken.views import obtain_auth_token
 
 def home_view(request):
@@ -32,6 +32,9 @@ def home_view(request):
 
 router = DefaultRouter()
 router.register(r'users', UzytkownikViewSet, basename='uzytkownik')
+
+router.register(r'plants', PlantViewSet, basename='plants')
+router.register(r'swaps', SwapViewSet, basename='swaps')
 urlpatterns = [
     path('', home_view, name='home'),
     path('admin/', admin.site.urls),

@@ -6,11 +6,12 @@ from django.shortcuts import redirect
 from rest_framework import viewsets, permissions, status, generics
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from .models import Uzytkownik
+from .models import Uzytkownik, Plant, Swap
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
-from .serializers import RegisterSerializer, UzytkownikSerializer
+from .serializers import RegisterSerializer, UzytkownikSerializer, PlantSerializer, SwapSerializer
 from rest_framework.permissions import AllowAny
+
 class UzytkownikViewSet(viewsets.ModelViewSet):
     queryset = Uzytkownik.objects.all()
     serializer_class = UzytkownikSerializer
@@ -35,6 +36,15 @@ class UzytkownikViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         return Response({'detail': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
 
+    @action(detail=False, methods=['put'], url_path='update')
+    def update_user(self, request):
+        user = request.user
+        serializer = self.get_serializer(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(last_activity=timezone.now())
+        return Response(serializer.data)
+
+
 class RegistrationView(generics.CreateAPIView):
     queryset = Uzytkownik.objects.all()
     serializer_class = RegisterSerializer
@@ -49,3 +59,24 @@ class RegistrationView(generics.CreateAPIView):
             'user': UzytkownikSerializer(user, context=self.get_serializer_context()).data,
             'token': token.key,
         }, status=status.HTTP_201_CREATED)
+
+
+
+class PlantViewSet(viewsets.ModelViewSet):
+    queryset = Plant.objects.all()
+    serializer_class = PlantSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class SwapViewSet(viewsets.ModelViewSet):
+    serializer_class = SwapSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Swap.objects.filter(
+            offered_plant__user=user
+        ) | Swap.objects.filter(requested_plant__user=user)
