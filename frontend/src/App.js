@@ -9,10 +9,6 @@ function HomePage({ user }) {
   const [recentPlants, setRecentPlants] = useState([]);
 
   useEffect(() => {
-    if (user) navigate("/profile");
-  }, [user, navigate]);
-
-  useEffect(() => {
     fetch("http://localhost:8000/api/plants/recent/")
       .then((res) => res.json())
       .then((data) => setRecentPlants(data))
@@ -22,9 +18,17 @@ function HomePage({ user }) {
   return (
     <div>
       <button onClick={() => navigate("/")}>🌿 LOGO</button>
-      <h1>Witamy w naszej aplikacji!</h1>
-      <button onClick={() => navigate("/login")}>Zaloguj się</button>{" "}
-      <button onClick={() => navigate("/register")}>Zarejestruj się</button>
+      {user ? (
+        <div>
+          <p>Witaj, {user.username}!</p>
+          <button onClick={() => navigate("/profile")}>Mój profil</button>
+        </div>
+      ) : (
+        <>
+          <button onClick={() => navigate("/login")}>Zaloguj się</button>{" "}
+          <button onClick={() => navigate("/register")}>Zarejestruj się</button>
+        </>
+      )}
 
       <h2>Ostatnie ogłoszenia:</h2>
       {recentPlants.length === 0 ? (
@@ -186,7 +190,7 @@ function App() {
             path="/login"
             element={
               token && user ? (
-                <Navigate to="/profile" />
+                <Navigate to="/" />
               ) : (
                 <LoginPage
                   formData={formData}
@@ -201,7 +205,7 @@ function App() {
             path="/register"
             element={
               token && user ? (
-                <Navigate to="/profile" />
+                <Navigate to="/" />
               ) : (
                 <RegisterPage
                   formData={formData}
