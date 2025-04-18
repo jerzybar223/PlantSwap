@@ -17,7 +17,18 @@ function UserProfile({ user, onLogout }) {
         .then((res) => res.json())
         .then(setSwaps);
     }
-  }, [view]);
+
+    if (view === "profile") {
+      fetch("http://localhost:8000/api/my-plants/", {
+        headers: { Authorization: `Token ${token}` },
+      })
+        .then((res) => res.json())
+        .then(setPlants)
+        .catch((err) => {
+          console.error("Błąd podczas pobierania roślin:", err);
+        });
+    }
+  }, [view, token]);
 
   const handleEditChange = (e) =>
     setEditData({ ...editData, [e.target.name]: e.target.value });
@@ -58,6 +69,13 @@ function UserProfile({ user, onLogout }) {
     if (res.ok) {
       alert("Roślina dodana!");
       e.target.reset();
+
+      // Odśwież listę roślin
+      const updated = await fetch("http://localhost:8000/api/my-plants/", {
+        headers: { Authorization: `Token ${token}` },
+      });
+      const data = await updated.json();
+      setPlants(data);
     } else {
       alert("Błąd podczas dodawania rośliny.");
     }
@@ -83,6 +101,28 @@ function UserProfile({ user, onLogout }) {
           <p>Email: {user.email}</p>
           <p>Lokalizacja: {user.location || "Brak"}</p>
           <p>Ostatnia aktywność: {user.last_activity}</p>
+
+          <h3>Twoje rośliny:</h3>
+          {plants.length === 0 ? (
+            <p>Nie dodałeś jeszcze żadnych roślin.</p>
+          ) : (
+            <ul>
+              {plants.map((plant) => (
+                <li key={plant.id}>
+                  <strong>{plant.name}</strong> – {plant.description}
+                  {plant.photo_url && (
+                    <div>
+                      <img
+                        src={plant.photo_url}
+                        alt={plant.name}
+                        width="100"
+                      />
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 

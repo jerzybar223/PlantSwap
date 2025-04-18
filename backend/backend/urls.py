@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from django.http import HttpResponse
-from .views import UzytkownikViewSet, RegistrationView,  PlantViewSet, SwapViewSet
+from .views import UzytkownikViewSet, RegistrationView, PlantViewSet, SwapViewSet, user_plants
 from rest_framework.authtoken.views import obtain_auth_token
 
 def home_view(request):
@@ -44,6 +44,7 @@ urlpatterns = [
 
     path('api/login/', obtain_auth_token, name='login'),
 
+    path('api/my-plants/', user_plants, name='user-plants'),
 
 
 ]

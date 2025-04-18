@@ -11,6 +11,8 @@ from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from .serializers import RegisterSerializer, UzytkownikSerializer, PlantSerializer, SwapSerializer
 from rest_framework.permissions import AllowAny
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 class UzytkownikViewSet(viewsets.ModelViewSet):
     queryset = Uzytkownik.objects.all()
@@ -70,6 +72,12 @@ class PlantViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    def recent(self, request):
+        recent_plants = Plant.objects.filter(is_available=True).order_by('-created_at')[:10]
+        serializer = self.get_serializer(recent_plants, many=True)
+        return Response(serializer.data)
+
 
 class SwapViewSet(viewsets.ModelViewSet):
     serializer_class = SwapSerializer
@@ -80,3 +88,10 @@ class SwapViewSet(viewsets.ModelViewSet):
         return Swap.objects.filter(
             offered_plant__user=user
         ) | Swap.objects.filter(requested_plant__user=user)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_plants(request):
+    plants = request.user.plants.all()
+    serializer = PlantSerializer(plants, many=True)
+    return Response(serializer.data)

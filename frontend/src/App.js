@@ -6,10 +6,18 @@ import UserProfile from "./components/UserProfile";
 
 function HomePage({ user }) {
   const navigate = useNavigate();
+  const [recentPlants, setRecentPlants] = useState([]);
 
   useEffect(() => {
     if (user) navigate("/profile");
   }, [user, navigate]);
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/plants/recent/")
+      .then((res) => res.json())
+      .then((data) => setRecentPlants(data))
+      .catch((err) => console.error("Błąd pobierania roślin:", err));
+  }, []);
 
   return (
     <div>
@@ -17,6 +25,19 @@ function HomePage({ user }) {
       <h1>Witamy w naszej aplikacji!</h1>
       <button onClick={() => navigate("/login")}>Zaloguj się</button>{" "}
       <button onClick={() => navigate("/register")}>Zarejestruj się</button>
+
+      <h2>Ostatnie ogłoszenia:</h2>
+      {recentPlants.length === 0 ? (
+        <p>Brak ogłoszeń do wyświetlenia.</p>
+      ) : (
+        <ul>
+          {recentPlants.map((plant) => (
+            <li key={plant.id}>
+              <strong>{plant.name}</strong> – {plant.description}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -32,7 +53,6 @@ function App() {
     password2: "",
     location: "",
   });
-
 
   useEffect(() => {
     if (token) {
