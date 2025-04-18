@@ -20,7 +20,7 @@ function UserProfile({ user, onLogout }) {
     }
 
     if (view === "profile") {
-      fetch("http://localhost:8000/api/my-plants/", {
+      fetch("http://localhost:8000/api/user_plants/", {
         headers: { Authorization: `Token ${token}` },
       })
         .then((res) => res.json())
