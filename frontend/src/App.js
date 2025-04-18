@@ -30,13 +30,23 @@ function HomePage({ user }) {
       {recentPlants.length === 0 ? (
         <p>Brak ogłoszeń do wyświetlenia.</p>
       ) : (
-        <ul>
-          {recentPlants.map((plant) => (
-            <li key={plant.id}>
-              <strong>{plant.name}</strong> – {plant.description}
-            </li>
-          ))}
-        </ul>
+          <ul>
+            {recentPlants.map((plant) => (
+                <li key={plant.id}>
+                  <strong>{plant.name}</strong> – {plant.description}
+                  {plant.photo_url && (
+                      <div>
+                        <img
+                            src={plant.photo_url}
+                            alt={plant.name}
+                            width="100"
+                        />
+                      </div>
+                  )}
+                </li>
+            ))}
+          </ul>
+
       )}
     </div>
   );

@@ -75,9 +75,9 @@ class PlantViewSet(viewsets.ModelViewSet):
         image = self.request.FILES.get('image')
         if image:
             photo_url = upload_image_to_cloudinary(image)
-            serializer.save(user=self.request.user, photo_url=photo_url)
+            serializer.save(user=self.request.user, photo_url=photo_url, is_available=True)
         else:
-            serializer.save(user=self.request.user)
+            serializer.save(user=self.request.user, is_available=True)
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
     def recent(self, request):
