@@ -4,9 +4,12 @@ import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import UserProfile from "./components/UserProfile";
 
-function HomePage({ user }) {
+function HomePage({ user, token }) {
   const navigate = useNavigate();
   const [recentPlants, setRecentPlants] = useState([]);
+  const [userPlants, setUserPlants] = useState([]);
+  const [selectedPlantToSwap, setSelectedPlantToSwap] = useState(null);
+  const [requestedPlant, setRequestedPlant] = useState(null);
 
   useEffect(() => {
     fetch("http://localhost:8000/api/plants/recent/")
@@ -14,6 +17,43 @@ function HomePage({ user }) {
       .then((data) => setRecentPlants(data))
       .catch((err) => console.error("Błąd pobierania roślin:", err));
   }, []);
+
+  const openSwapModal = async (plant) => {
+    if (!user || !token) return alert("Musisz być zalogowany, by zaproponować wymianę.");
+
+    const res = await fetch("http://localhost:8000/api/user_plants/", {
+      headers: { Authorization: `Token ${token}` },
+    });
+
+    const data = await res.json();
+    setUserPlants(data);
+    setRequestedPlant(plant);
+  };
+
+  const submitSwap = async () => {
+    if (!selectedPlantToSwap || !requestedPlant) return;
+
+    const res = await fetch("http://localhost:8000/api/swaps/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+      body: JSON.stringify({
+        offered_plant: selectedPlantToSwap.id,
+        requested_plant: requestedPlant.id,
+      }),
+    });
+
+    if (res.ok) {
+      alert("Propozycja wymiany została wysłana!");
+      setSelectedPlantToSwap(null);
+      setRequestedPlant(null);
+    } else {
+      const err = await res.json();
+      alert("Błąd: " + JSON.stringify(err));
+    }
+  };
 
   return (
     <div>
@@ -34,23 +74,46 @@ function HomePage({ user }) {
       {recentPlants.length === 0 ? (
         <p>Brak ogłoszeń do wyświetlenia.</p>
       ) : (
-          <ul>
-            {recentPlants.map((plant) => (
-                <li key={plant.id}>
-                  <strong>{plant.name}</strong> – {plant.description}
-                  {plant.photo_url && (
-                      <div>
-                        <img
-                            src={plant.photo_url}
-                            alt={plant.name}
-                            width="100"
-                        />
-                      </div>
-                  )}
-                </li>
-            ))}
-          </ul>
+        <ul>
+          {recentPlants.map((plant) => (
+            <li key={plant.id}>
+              <strong>{plant.name}</strong> – {plant.description}
+              {plant.photo_url && (
+                <div>
+                  <img src={plant.photo_url} alt={plant.name} width="100" />
+                </div>
+              )}
 
+              {user && plant.user !== user.id && (
+                <button onClick={() => openSwapModal(plant)}>Wymień</button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {requestedPlant && (
+        <div style={{ marginTop: "2rem", padding: "1rem", border: "1px solid gray" }}>
+          <h3>Proponujesz wymianę za: <strong>{requestedPlant.name}</strong></h3>
+          <label>Wybierz jedną ze swoich roślin:</label>
+          <select
+            value={selectedPlantToSwap?.id || ""}
+            onChange={(e) => {
+              const selected = userPlants.find((p) => p.id === parseInt(e.target.value));
+              setSelectedPlantToSwap(selected);
+            }}
+          >
+            <option value="">-- wybierz --</option>
+            {userPlants.map((plant) => (
+              <option key={plant.id} value={plant.id}>
+                {plant.name}
+              </option>
+            ))}
+          </select>
+          <br />
+          <button onClick={submitSwap} disabled={!selectedPlantToSwap}>Zaproponuj wymianę</button>{" "}
+          <button onClick={() => setRequestedPlant(null)}>Anuluj</button>
+        </div>
       )}
     </div>
   );
@@ -184,7 +247,7 @@ function App() {
     <Router>
       <div style={{ padding: "2rem" }}>
         <Routes>
-          <Route path="/" element={<HomePage user={user} />} />
+          <Route path="/" element={<HomePage user={user} token={token} />} />
 
           <Route
             path="/login"

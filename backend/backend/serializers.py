@@ -44,6 +44,9 @@ class PlantSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'last_updated', 'user']
 
+    def get_is_owned_by_user(self, obj):
+        request = self.context.get('request')
+        return request.user.is_authenticated and obj.user == request.user
 
 class SwapSerializer(serializers.ModelSerializer):
     offered_plant_name = serializers.SerializerMethodField()

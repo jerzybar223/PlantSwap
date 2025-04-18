@@ -66,7 +66,7 @@ class RegistrationView(generics.CreateAPIView):
 
 
 class PlantViewSet(viewsets.ModelViewSet):
-    queryset = Plant.objects.all()
+    queryset = Plant.objects.filter(is_available=True)
     serializer_class = PlantSerializer
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
@@ -78,6 +78,11 @@ class PlantViewSet(viewsets.ModelViewSet):
             serializer.save(user=self.request.user, photo_url=photo_url, is_available=True)
         else:
             serializer.save(user=self.request.user, is_available=True)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
     def recent(self, request):
@@ -96,10 +101,19 @@ class SwapViewSet(viewsets.ModelViewSet):
             offered_plant__user=user
         ) | Swap.objects.filter(requested_plant__user=user)
 
+    def perform_create(self, serializer):
+        offered_plant = serializer.validated_data['offered_plant']
+        requested_plant = serializer.validated_data['requested_plant']
+        if not offered_plant.is_available:
+            return Response({"error": "Roślina nie jest dostępna do wymiany."}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.save()
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_plants(request):
-    plants = request.user.plants.all()
+    plants = request.user.plants.filter(is_available=True)
     serializer = PlantSerializer(plants, many=True)
     return Response(serializer.data)
 

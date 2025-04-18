@@ -44,7 +44,7 @@ urlpatterns = [
 
     path('api/login/', obtain_auth_token, name='login'),
 
-    path('api/my-plants/', user_plants, name='user-plants'),
+    path('api/user_plants/', user_plants, name='user-plants'),
 
 
 ]
