@@ -13,7 +13,8 @@ from .serializers import RegisterSerializer, UzytkownikSerializer, PlantSerializ
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-
+import cloudinary.uploader
+from rest_framework.parsers import MultiPartParser, FormParser
 class UzytkownikViewSet(viewsets.ModelViewSet):
     queryset = Uzytkownik.objects.all()
     serializer_class = UzytkownikSerializer
@@ -68,9 +69,15 @@ class PlantViewSet(viewsets.ModelViewSet):
     queryset = Plant.objects.all()
     serializer_class = PlantSerializer
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        image = self.request.FILES.get('image')
+        if image:
+            photo_url = upload_image_to_cloudinary(image)
+            serializer.save(user=self.request.user, photo_url=photo_url)
+        else:
+            serializer.save(user=self.request.user)
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
     def recent(self, request):
@@ -95,3 +102,12 @@ def user_plants(request):
     plants = request.user.plants.all()
     serializer = PlantSerializer(plants, many=True)
     return Response(serializer.data)
+
+def upload_image_to_cloudinary(image_file):
+    cloudinary.config(
+        cloud_name="dmk1vi13e",
+        api_key="524859882675675",
+        api_secret="nN3xOocJUG8zbA0B2D8xoJxrTkc"
+    )
+    result = cloudinary.uploader.upload(image_file)
+    return result['secure_url']

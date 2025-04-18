@@ -41,7 +41,19 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework.authtoken',
     'backend',
+    'cloudinary',
+    'cloudinary_storage',
 ]
+
+
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dmk1vi13e',
+    'API_KEY': '524859882675675',
+    'API_SECRET': 'nN3xOocJUG8zbA0B2D8xoJxrTkc',
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

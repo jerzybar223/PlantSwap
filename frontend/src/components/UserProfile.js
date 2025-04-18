@@ -6,6 +6,7 @@ function UserProfile({ user, onLogout }) {
   const [editData, setEditData] = useState({ ...user });
   const [plants, setPlants] = useState([]);
   const [swaps, setSwaps] = useState([]);
+  const [image, setImage] = useState(null); // Stan na obraz
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
@@ -51,26 +52,29 @@ function UserProfile({ user, onLogout }) {
     }
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0]; // Pobieramy pierwszy wybrany plik
+    setImage(file); // Ustawiamy plik w stanie
+  };
+
   const handlePlantSubmit = async (e) => {
     e.preventDefault();
+    const formData = new FormData(e.target);
+    if (image) {
+      formData.append("image", image); // Dodajemy obraz do FormData
+    }
+
     const res = await fetch("http://localhost:8000/api/plants/", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Token ${token}`,
       },
-      body: JSON.stringify({
-        name: e.target.name.value,
-        description: e.target.description.value,
-        photo_url: e.target.photo_url.value,
-      }),
+      body: formData,
     });
 
     if (res.ok) {
       alert("Roślina dodana!");
       e.target.reset();
-
-      // Odśwież listę roślin
       const updated = await fetch("http://localhost:8000/api/my-plants/", {
         headers: { Authorization: `Token ${token}` },
       });
@@ -164,7 +168,7 @@ function UserProfile({ user, onLogout }) {
           <br />
           <textarea name="description" placeholder="Opis" />
           <br />
-          <input name="photo_url" placeholder="URL zdjęcia" />
+          <input type="file" name="image" accept="image/*" onChange={handleImageChange} />
           <br />
           <button type="submit">Dodaj</button>
         </form>
