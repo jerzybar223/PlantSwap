@@ -1,12 +1,30 @@
 import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import UserProfile from "./components/UserProfile";
 
+function HomePage({ user }) {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) navigate("/profile");
+  }, [user, navigate]);
+
+  return (
+    <div>
+      <button onClick={() => navigate("/")}>🌿 LOGO</button>
+      <h1>Witamy w naszej aplikacji!</h1>
+      <button onClick={() => navigate("/login")}>Zaloguj się</button>{" "}
+      <button onClick={() => navigate("/register")}>Zarejestruj się</button>
+    </div>
+  );
+}
+
 function App() {
-  const [view, setView] = useState("home");
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [user, setUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -14,6 +32,7 @@ function App() {
     password2: "",
     location: "",
   });
+
 
   useEffect(() => {
     if (token) {
@@ -26,12 +45,15 @@ function App() {
         })
         .then((data) => {
           setUser(data);
-          setView("dashboard");
+          setLoadingUser(false);
         })
         .catch(() => {
           setToken(null);
           localStorage.removeItem("token");
+          setLoadingUser(false);
         });
+    } else {
+      setLoadingUser(false);
     }
   }, [token]);
 
@@ -71,7 +93,6 @@ function App() {
       setToken(data.token);
       localStorage.setItem("token", data.token);
       setUser(data.user);
-      setView("dashboard");
     } else {
       alert("Rejestracja nieudana: " + JSON.stringify(data));
     }
@@ -107,7 +128,6 @@ function App() {
       setToken(data.token);
       localStorage.setItem("token", data.token);
       setUser(data.user);
-      setView("dashboard");
     } else {
       alert("Logowanie nieudane: " + JSON.stringify(data));
     }
@@ -124,43 +144,61 @@ function App() {
       password2: "",
       location: "",
     });
-    setView("home");
   };
 
   return (
-    <div style={{ padding: "2rem" }}>
-      {view === "home" && (
-        <div>
-          <h1>Witamy w naszej aplikacji!</h1>
-          <button onClick={() => setView("login")}>Zaloguj się</button>{" "}
-          <button onClick={() => setView("register")}>Zarejestruj się</button>
-        </div>
-      )}
+    <Router>
+      <div style={{ padding: "2rem" }}>
+        <Routes>
+          <Route path="/" element={<HomePage user={user} />} />
 
-      {view === "login" && (
-        <LoginPage
-          formData={formData}
-          onChange={handleChange}
-          onLogin={handleLogin}
-          switchToRegister={() => setView("register")}
-          backToHome={() => setView("home")}
-        />
-      )}
+          <Route
+            path="/login"
+            element={
+              token && user ? (
+                <Navigate to="/profile" />
+              ) : (
+                <LoginPage
+                  formData={formData}
+                  onChange={handleChange}
+                  onLogin={handleLogin}
+                />
+              )
+            }
+          />
 
-      {view === "register" && (
-        <RegisterPage
-          formData={formData}
-          onChange={handleChange}
-          onRegister={handleRegister}
-          switchToLogin={() => setView("login")}
-          backToHome={() => setView("home")}
-        />
-      )}
+          <Route
+            path="/register"
+            element={
+              token && user ? (
+                <Navigate to="/profile" />
+              ) : (
+                <RegisterPage
+                  formData={formData}
+                  onChange={handleChange}
+                  onRegister={handleRegister}
+                />
+              )
+            }
+          />
 
-      {view === "dashboard" && user && (
-        <UserProfile user={user} onLogout={handleLogout} />
-      )}
-    </div>
+          <Route
+            path="/profile"
+            element={
+              loadingUser ? (
+                <p>Ładowanie danych użytkownika...</p>
+              ) : token && user ? (
+                <UserProfile user={user} onLogout={handleLogout} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

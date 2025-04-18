@@ -1,8 +1,14 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 function LoginPage({ formData, onChange, onLogin, switchToRegister }) {
+  const navigate = useNavigate();
+
   return (
     <form onSubmit={onLogin}>
+      <button type="button" onClick={() => navigate("/")}>
+        🌿 LOGO
+      </button>
       <h2>Logowanie</h2>
       <input
         type="text"

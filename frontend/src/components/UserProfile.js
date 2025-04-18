@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 function UserProfile({ user, onLogout }) {
   const [view, setView] = useState("profile");
   const [editData, setEditData] = useState({ ...user });
   const [plants, setPlants] = useState([]);
   const [swaps, setSwaps] = useState([]);
-
   const token = localStorage.getItem("token");
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (view === "swaps") {
@@ -64,8 +65,12 @@ function UserProfile({ user, onLogout }) {
 
   return (
     <div>
+      <button type="button" onClick={() => navigate("/")}>
+        🌿 LOGO
+      </button>
       <h2>Witaj, {user.username}!</h2>
       <button onClick={onLogout}>Wyloguj się</button>
+
       <div style={{ marginTop: "1rem" }}>
         <button onClick={() => setView("profile")}>Profil</button>
         <button onClick={() => setView("edit")}>Zmień dane</button>
