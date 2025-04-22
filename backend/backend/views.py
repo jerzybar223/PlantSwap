@@ -94,6 +94,7 @@ class PlantViewSet(viewsets.ModelViewSet):
 class SwapViewSet(viewsets.ModelViewSet):
     serializer_class = SwapSerializer
     permission_classes = [permissions.IsAuthenticated]
+    queryset = Swap.objects.all()
 
     def get_queryset(self):
         user = self.request.user
@@ -108,6 +109,25 @@ class SwapViewSet(viewsets.ModelViewSet):
             return Response({"error": "Roślina nie jest dostępna do wymiany."}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer.save()
+
+    def update(self, serializer, request, *args, **kwargs, ):
+        requested_plant = serializer.validated_data['requested_plant']
+        instance = self.get_object()
+        user = request.user
+        if instance.requested_plant.user != user:
+            return Response({'detail': 'Nie masz uprawnień do zmiany statusu tej wymiany.'},
+                            status=status.HTTP_403_FORBIDDEN)
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
 
 
 @api_view(['GET'])

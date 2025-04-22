@@ -53,15 +53,37 @@ function UserProfile({ user, onLogout }) {
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0]; // Pobieramy pierwszy wybrany plik
-    setImage(file); // Ustawiamy plik w stanie
+    const file = e.target.files[0];
+    setImage(file);
+  };
+
+  const updateSwapStatus = async (swapId, newStatus) => {
+    const res = await fetch(`http://localhost:8000/api/swaps/${swapId}/`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+      body: JSON.stringify({ status: newStatus }),
+    });
+
+    if (res.ok) {
+      alert(`Wymiana została ${newStatus === "accepted" ? "zatwierdzona" : "odrzucona"}.`);
+      const updated = await fetch("http://localhost:8000/api/swaps/", {
+        headers: { Authorization: `Token ${token}` },
+      });
+      const data = await updated.json();
+      setSwaps(data);
+    } else {
+      alert("Błąd podczas aktualizacji statusu.");
+    }
   };
 
   const handlePlantSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     if (image) {
-      formData.append("image", image); // Dodajemy obraz do FormData
+      formData.append("image", image);
     }
 
     const res = await fetch("http://localhost:8000/api/plants/", {
@@ -176,25 +198,31 @@ function UserProfile({ user, onLogout }) {
 
       {view === "swaps" && (
         <div>
-          <h3>Propozycje wymian</h3>
+          <h3>Moje wymiany</h3>
           {swaps.length === 0 ? (
             <p>Brak propozycji wymian.</p>
           ) : (
             swaps.map((swap) => (
-              <div key={swap.id}>
-                <p>
-                  Ty oferujesz: <strong>{swap.offered_plant_name}</strong>
-                </p>
-                <p>
-                  Ty chcesz: <strong>{swap.requested_plant_name}</strong>
-                </p>
-                <p>Status: {swap.status}</p>
-                <hr />
-              </div>
+                <div key={swap.id} style={{border: "1px solid #ccc", marginBottom: "1rem", padding: "1rem"}}>
+                  <p>Ty oferujesz: <strong>{swap.offered_plant_name}</strong></p>
+                  <p>Ty chcesz: <strong>{swap.requested_plant_name}</strong></p>
+                  <p>Status: <strong>{swap.status}</strong></p>
+
+                  { swap.status === "pending" && (
+                      <div>
+                        <button onClick={() => updateSwapStatus(swap.id, "accepted")}>Zatwierdź</button>
+                        {" "}
+                        <button onClick={() => updateSwapStatus(swap.id, "rejected")}>Odrzuć</button>
+                      </div>
+                  )}
+
+
+                </div>
             ))
           )}
         </div>
       )}
+
     </div>
   );
 }

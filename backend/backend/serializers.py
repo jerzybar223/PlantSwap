@@ -51,6 +51,7 @@ class PlantSerializer(serializers.ModelSerializer):
 class SwapSerializer(serializers.ModelSerializer):
     offered_plant_name = serializers.SerializerMethodField()
     requested_plant_name = serializers.SerializerMethodField()
+    requested_plant_owner_id = serializers.IntegerField(source='requested_plant_id.user.id', read_only=True)
 
     class Meta:
         model = Swap

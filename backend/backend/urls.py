@@ -25,7 +25,7 @@ def home_view(request):
     return HttpResponse("""
         <p>Dostępne endpointy:</p>
         <ul>
-            <li><a href="/api/users/">/api/users/</a> - Lista użytkowników</li>
+            <li><a href="/api/">/api/</a> - Obsługa Api</li>
             <li><a href="/admin/">/admin/</a> - Panel administracyjny</li>
         </ul>
     """)
