@@ -30,7 +30,10 @@ function UserProfile({ user, onLogout }) {
         headers: { Authorization: `Token ${token}` },
       })
         .then((res) => res.json())
-        .then(setSwaps);
+        .then((data) => {
+          const sorted = data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+          setSwaps(sorted);
+        });
     }
 
     if (view === "profile") {
