@@ -110,21 +110,30 @@ class SwapViewSet(viewsets.ModelViewSet):
 
         serializer.save()
 
-    def update(self, serializer, request, *args, **kwargs, ):
-        requested_plant = serializer.validated_data['requested_plant']
-        instance = self.get_object()
-        user = request.user
-        if instance.requested_plant.user != user:
-            return Response({'detail': 'Nie masz uprawnień do zmiany statusu tej wymiany.'},
-                            status=status.HTTP_403_FORBIDDEN)
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
+
+        if serializer.validated_data.get('status') == 'accepted':
+            plant1 = instance.offered_plant
+            plant2 = instance.requested_plant
+
+            plant1.is_available = False
+            plant1.save()
+            plant2.is_available = False
+            plant2.save()
+
+            Swap.objects.filter(
+                status='pending',
+                offered_plant__in=[plant1, plant2]
+            ).exclude(id=instance.id).update(status='rejected')
+
+            Swap.objects.filter(
+                status='pending',
+                requested_plant__in=[plant1, plant2]
+            ).exclude(id=instance.id).update(status='rejected')
+
         self.perform_update(serializer)
 
         return Response(serializer.data)
