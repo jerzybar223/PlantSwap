@@ -10,6 +10,20 @@ function UserProfile({ user, onLogout }) {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
+  const translateStatus = (status) => {
+  switch (status) {
+    case "pending":
+      return "oczekujące";
+    case "accepted":
+      return "zaakceptowane";
+    case "rejected":
+      return "odrzucone";
+    default:
+      return status;
+  }
+};
+
+
   useEffect(() => {
     if (view === "swaps") {
       fetch("http://localhost:8000/api/swaps/", {
@@ -206,9 +220,10 @@ function UserProfile({ user, onLogout }) {
                 <div key={swap.id} style={{border: "1px solid #ccc", marginBottom: "1rem", padding: "1rem"}}>
                   <p>Ty oferujesz: <strong>{swap.offered_plant_name}</strong></p>
                   <p>Ty chcesz: <strong>{swap.requested_plant_name}</strong></p>
-                  <p>Status: <strong>{swap.status}</strong></p>
+                  <p>Status: <strong>{translateStatus(swap.status)}</strong></p>
 
-                  { swap.status === "pending" && (
+
+                  {swap.status === "pending" && swap.requested_plant_owner_id === Number(user.id) && (
                       <div>
                         <button onClick={() => updateSwapStatus(swap.id, "accepted")}>Zatwierdź</button>
                         {" "}
