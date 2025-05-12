@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, Link } from "react-router-dom";
 import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import UserProfile from "./components/UserProfile";
@@ -56,36 +56,35 @@ function HomePage({ user, token }) {
   };
 
   return (
-    <div>
-      <button onClick={() => navigate("/")}>🌿 LOGO</button>
+    <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '80vh' }}>
       {user ? (
-        <div>
+        <div className="mb-3 text-center">
           <p>Witaj, {user.username}!</p>
-          <button onClick={() => navigate("/profile")}>Mój profil</button>
+          <button className="btn btn-success mx-1" onClick={() => navigate("/profile")}>Mój profil</button>
         </div>
       ) : (
-        <>
-          <button onClick={() => navigate("/login")}>Zaloguj się</button>{" "}
-          <button onClick={() => navigate("/register")}>Zarejestruj się</button>
-        </>
+        <div className="mb-3 text-center">
+          <button className="btn btn-success mx-1" onClick={() => navigate("/login")}>Zaloguj się</button>
+          <button className="btn btn-success mx-1" onClick={() => navigate("/register")}>Zarejestruj się</button>
+        </div>
       )}
 
-      <h2>Ostatnie ogłoszenia:</h2>
+      <h2 className="mb-4">Ostatnie ogłoszenia:</h2>
       {recentPlants.length === 0 ? (
         <p>Brak ogłoszeń do wyświetlenia.</p>
       ) : (
-        <ul>
+        <ul className="list-group mb-4" style={{ maxWidth: 600 }}>
           {recentPlants.map((plant) => (
-            <li key={plant.id}>
+            <li key={plant.id} className="list-group-item d-flex flex-column align-items-center">
               <strong>{plant.name}</strong> – {plant.description}
               {plant.photo_url && (
-                <div>
+                <div className="my-2">
                   <img src={plant.photo_url} alt={plant.name} width="100" />
                 </div>
               )}
 
               {user && plant.user !== user.id && (
-                <button onClick={() => openSwapModal(plant)}>Wymień</button>
+                <button className="btn btn-success mt-2" onClick={() => openSwapModal(plant)}>Wymień</button>
               )}
             </li>
           ))}
@@ -93,10 +92,11 @@ function HomePage({ user, token }) {
       )}
 
       {requestedPlant && (
-        <div style={{ marginTop: "2rem", padding: "1rem", border: "1px solid gray" }}>
-          <h3>Proponujesz wymianę za: <strong>{requestedPlant.name}</strong></h3>
-          <label>Wybierz jedną ze swoich roślin:</label>
+        <div className="card p-3 mt-4" style={{ maxWidth: 500 }}>
+          <h3 className="mb-3">Proponujesz wymianę za: <strong>{requestedPlant.name}</strong></h3>
+          <label className="mb-2">Wybierz jedną ze swoich roślin:</label>
           <select
+            className="form-select mb-3"
             value={selectedPlantToSwap?.id || ""}
             onChange={(e) => {
               const selected = userPlants.find((p) => p.id === parseInt(e.target.value));
@@ -110,9 +110,10 @@ function HomePage({ user, token }) {
               </option>
             ))}
           </select>
-          <br />
-          <button onClick={submitSwap} disabled={!selectedPlantToSwap}>Zaproponuj wymianę</button>{" "}
-          <button onClick={() => setRequestedPlant(null)}>Anuluj</button>
+          <div className="d-flex justify-content-between">
+            <button className="btn btn-success" onClick={submitSwap} disabled={!selectedPlantToSwap}>Zaproponuj wymianę</button>
+            <button className="btn btn-outline-danger" onClick={() => setRequestedPlant(null)}>Anuluj</button>
+          </div>
         </div>
       )}
     </div>
@@ -245,6 +246,14 @@ function App() {
 
   return (
     <Router>
+      <nav className="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <div className="container-fluid">
+          <Link className="navbar-brand d-flex align-items-center" to="/" style={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
+            <span role="img" aria-label="logo" style={{ fontSize: '2rem', marginRight: '0.5rem' }}>🌿</span>
+            PlantSwap
+          </Link>
+        </div>
+      </nav>
       <div style={{ padding: "2rem" }}>
         <Routes>
           <Route path="/" element={<HomePage user={user} token={token} />} />

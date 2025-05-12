@@ -1,69 +1,67 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function RegisterPage({ setUser, setToken }) {
-  const [formData, setFormData] = useState({
-    username: "", email: "", password: "", password2: "", location: ""
-  });
-
+function RegisterPage({ formData, onChange, onRegister }) {
   const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    const { username, email, password, password2, location } = formData;
-
-    if (!username || !email || !password || !password2 || !location) {
-      alert("Wszystkie pola są wymagane.");
-      return;
-    }
-
-    if (password !== password2) {
-      alert("Hasła muszą być takie same.");
-      return;
-    }
-
-    const res = await fetch("http://localhost:8000/api/register/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
-
-    let data;
-    try {
-      data = await res.json();
-    } catch (err) {
-      const text = await res.text();
-      alert("Błąd odpowiedzi serwera: " + text);
-      return;
-    }
-
-    if (res.ok) {
-      setToken(data.token);
-      localStorage.setItem("token", data.token);
-      setUser(data.user);
-      navigate("/profile");
-    } else {
-      alert("Rejestracja nieudana: " + JSON.stringify(data));
-    }
-  };
-
   return (
-    <form onSubmit={handleRegister}>
-      <button type="button" onClick={() => navigate("/")}>🌿 LOGO</button>
-      <h2>Rejestracja</h2>
-      <input name="username" placeholder="Nazwa użytkownika" value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} required />
-      <br />
-      <input type="email" name="email" placeholder="Email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
-      <br />
-      <input type="password" name="password" placeholder="Hasło" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} required />
-      <br />
-      <input type="password" name="password2" placeholder="Powtórz hasło" value={formData.password2} onChange={(e) => setFormData({ ...formData, password2: e.target.value })} required />
-      <br />
-      <input name="location" placeholder="Lokalizacja" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} required />
-      <br />
-      <button type="submit">Zarejestruj się</button>
-      <p>Masz już konto? <button type="button" onClick={() => navigate("/login")}>Zaloguj się</button></p>
-    </form>
+    <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '70vh' }}>
+      <div className="card p-4" style={{ minWidth: 350, maxWidth: 400 }}>
+        <h2 className="mb-4 text-center">Rejestracja</h2>
+        <form onSubmit={onRegister}>
+          <input
+            name="username"
+            className="form-control mb-3"
+            placeholder="Nazwa użytkownika"
+            value={formData.username}
+            onChange={onChange}
+            required
+          />
+          <input
+            type="email"
+            name="email"
+            className="form-control mb-3"
+            placeholder="Email"
+            value={formData.email}
+            onChange={onChange}
+            required
+          />
+          <input
+            type="password"
+            name="password"
+            className="form-control mb-3"
+            placeholder="Hasło"
+            value={formData.password}
+            onChange={onChange}
+            required
+          />
+          <input
+            type="password"
+            name="password2"
+            className="form-control mb-3"
+            placeholder="Powtórz hasło"
+            value={formData.password2}
+            onChange={onChange}
+            required
+          />
+          <input
+            name="location"
+            className="form-control mb-3"
+            placeholder="Lokalizacja"
+            value={formData.location}
+            onChange={onChange}
+            required
+          />
+          <button type="submit" className="btn btn-success w-100 mb-2">Zarejestruj się</button>
+        </form>
+        <div className="text-center mt-2">
+          <span>Masz już konto? </span>
+          <button type="button" className="btn btn-link p-0" onClick={() => navigate('/login')}>
+            Zaloguj się
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
