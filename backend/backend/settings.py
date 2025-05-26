@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,12 +48,6 @@ INSTALLED_APPS = [
 ]
 
 
-
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dmk1vi13e',
-    'API_KEY': '524859882675675',
-    'API_SECRET': 'nN3xOocJUG8zbA0B2D8xoJxrTkc',
-}
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
@@ -102,16 +98,6 @@ AUTH_USER_MODEL = 'backend.Uzytkownik'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'defaultdb',
-        'USER': 'avnadmin',
-        'PASSWORD': 'AVNS_Gmp6nLzDRDJs6DJPO40',
-        'HOST': 'pg-17e48b81-plantswap-e4cd.h.aivencloud.com',
-        'PORT': '17412',
-    }
-}
 
 '''
 DATABASES = {
@@ -121,6 +107,23 @@ DATABASES = {
     }
 }
 '''
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT'),
+    }
+}
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUD_NAME'),
+    'API_KEY': config('CLOUD_API_KEY'),
+    'API_SECRET': config('CLOUD_API_SECRET'),
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
