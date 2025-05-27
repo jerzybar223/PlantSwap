@@ -274,6 +274,8 @@ function App() {
                   formData={formData}
                   onChange={handleChange}
                   onRegister={handleRegister}
+                  setToken={setToken}
+                  setUser={setUser}
                 />
               )
             }

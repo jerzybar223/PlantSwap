@@ -18,6 +18,9 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Message
 from django.utils.dateparse import parse_datetime
 from .serializers import MessageSerializer
+from django.conf import settings
+import cloudinary
+import cloudinary.uploader
 class UzytkownikViewSet(viewsets.ModelViewSet):
     queryset = Uzytkownik.objects.all()
     serializer_class = UzytkownikSerializer
@@ -151,9 +154,9 @@ def user_plants(request):
 
 def upload_image_to_cloudinary(image_file):
     cloudinary.config(
-        cloud_name="dmk1vi13e",
-        api_key="524859882675675",
-        api_secret="nN3xOocJUG8zbA0B2D8xoJxrTkc"
+        cloud_name=settings.CLOUDINARY_STORAGE['CLOUD_NAME'],
+        api_key=settings.CLOUDINARY_STORAGE['API_KEY'],
+        api_secret=settings.CLOUDINARY_STORAGE['API_SECRET']
     )
     result = cloudinary.uploader.upload(image_file)
     return result['secure_url']

@@ -114,7 +114,7 @@ function UserProfile({ user, onLogout }) {
     if (res.ok) {
       alert("Roślina dodana!");
       e.target.reset();
-      const updated = await fetch("http://localhost:8000/api/my-plants/", {
+      const updated = await fetch("http://localhost:8000/api/user_plants/", {
         headers: { Authorization: `Token ${token}` },
       });
       const data = await updated.json();
