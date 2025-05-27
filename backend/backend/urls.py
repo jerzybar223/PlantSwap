@@ -20,7 +20,7 @@ from rest_framework.routers import DefaultRouter
 from django.http import HttpResponse
 from .views import UzytkownikViewSet, RegistrationView, PlantViewSet, SwapViewSet, user_plants
 from rest_framework.authtoken.views import obtain_auth_token
-
+from .views import MessageViewSet
 def home_view(request):
     return HttpResponse("""
         <p>Dostępne endpointy:</p>
@@ -35,6 +35,8 @@ router.register(r'users', UzytkownikViewSet, basename='uzytkownik')
 
 router.register(r'plants', PlantViewSet, basename='plants')
 router.register(r'swaps', SwapViewSet, basename='swaps')
+
+router.register(r'messages', MessageViewSet, basename='messages')
 urlpatterns = [
     path('', home_view, name='home'),
     path('admin/', admin.site.urls),

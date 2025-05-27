@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Uzytkownik, Plant, Swap
+from .models import Uzytkownik, Plant, Swap, Message
 
 class UzytkownikSerializer(serializers.ModelSerializer):
     class Meta:
@@ -62,3 +62,12 @@ class SwapSerializer(serializers.ModelSerializer):
 
     def get_requested_plant_name(self, obj):
         return obj.requested_plant.name if obj.requested_plant else None
+
+class MessageSerializer(serializers.ModelSerializer):
+    sender_username = serializers.CharField(source='sender.username', read_only=True)
+    receiver_username = serializers.CharField(source='receiver.username', read_only=True)
+
+    class Meta:
+        model = Message
+        fields = ['id', 'sender', 'sender_username', 'receiver', 'receiver_username', 'content', 'sent_at']
+        read_only_fields = ['id', 'sent_at', 'sender']

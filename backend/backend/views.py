@@ -15,6 +15,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 import cloudinary.uploader
 from rest_framework.parsers import MultiPartParser, FormParser
+from .models import Message
+from django.utils.dateparse import parse_datetime
+from .serializers import MessageSerializer
 class UzytkownikViewSet(viewsets.ModelViewSet):
     queryset = Uzytkownik.objects.all()
     serializer_class = UzytkownikSerializer
@@ -154,3 +157,62 @@ def upload_image_to_cloudinary(image_file):
     )
     result = cloudinary.uploader.upload(image_file)
     return result['secure_url']
+
+
+class MessageViewSet(viewsets.ModelViewSet):
+    serializer_class = MessageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(sender=self.request.user)
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Message.objects.filter(
+            sender=user
+        ) | Message.objects.filter(
+            receiver=user
+        )
+
+        # Filtrowanie po czasie wysłania
+        sent_after = self.request.query_params.get('sent_after')
+        sent_before = self.request.query_params.get('sent_before')
+
+        if sent_after:
+            parsed_after = parse_datetime(sent_after)
+            if parsed_after:
+                queryset = queryset.filter(sent_at__gte=parsed_after)
+
+        if sent_before:
+            parsed_before = parse_datetime(sent_before)
+            if parsed_before:
+                queryset = queryset.filter(sent_at__lte=parsed_before)
+
+        return queryset.order_by('-sent_at')
+
+    @action(detail=False, methods=['get'], url_path='with/(?P<user_id>[^/.]+)')
+    def messages_with_user(self, request, user_id=None):
+        user = request.user
+        queryset = Message.objects.filter(
+            sender=user, receiver_id=user_id
+        ) | Message.objects.filter(
+            sender_id=user_id, receiver=user
+        )
+
+        # Filtrowanie w rozmowie 1:1
+        sent_after = self.request.query_params.get('sent_after')
+        sent_before = self.request.query_params.get('sent_before')
+
+        if sent_after:
+            parsed_after = parse_datetime(sent_after)
+            if parsed_after:
+                queryset = queryset.filter(sent_at__gte=parsed_after)
+
+        if sent_before:
+            parsed_before = parse_datetime(sent_before)
+            if parsed_before:
+                queryset = queryset.filter(sent_at__lte=parsed_before)
+
+        queryset = queryset.order_by('sent_at')
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
