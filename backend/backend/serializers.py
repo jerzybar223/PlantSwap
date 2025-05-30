@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Uzytkownik, Plant, Swap, Message
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from .utils.crypto import encrypt_message, decrypt_message
 
 class UzytkownikSerializer(serializers.ModelSerializer):
     class Meta:
@@ -95,17 +96,32 @@ class SwapSerializer(serializers.ModelSerializer):
         return value
 
 class MessageSerializer(serializers.ModelSerializer):
-    sender_username = serializers.CharField(source='sender.username', read_only=True)
-    receiver_username = serializers.CharField(source='receiver.username', read_only=True)
+    content = serializers.CharField()
 
     class Meta:
         model = Message
-        fields = ['id', 'sender', 'sender_username', 'receiver', 'receiver_username', 'content', 'sent_at']
-        read_only_fields = ['id', 'sent_at', 'sender']
+        fields = ['id', 'sender', 'receiver', 'content', 'sent_at']
+        read_only_fields = ['sender', 'sent_at']
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        # odszyfrowujemy content przy odczycie
+        ret['content'] = decrypt_message(ret['content'])
+        return ret
 
     def validate_content(self, value):
-        if not value.strip():
-            raise serializers.ValidationError("Wiadomość nie może być pusta.")
-        if len(value) > 2000:
-            raise serializers.ValidationError("Wiadomość jest za długa (maks. 2000 znaków).")
+        if len(value) > 5000:
+            raise serializers.ValidationError("Content too long.")
         return value
+
+    def create(self, validated_data):
+        # szyfrujemy content przed zapisem
+        raw_content = validated_data.pop('content')
+        validated_data['content'] = encrypt_message(raw_content)
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        if 'content' in validated_data:
+            raw_content = validated_data.pop('content')
+            validated_data['content'] = encrypt_message(raw_content)
+        return super().update(instance, validated_data)

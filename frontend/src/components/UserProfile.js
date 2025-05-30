@@ -123,6 +123,32 @@ function UserProfile({ user, onLogout }) {
       alert("Błąd podczas dodawania rośliny.");
     }
   };
+  const sendTestMessage = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/messages/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json',
+          Authorization: `Token ${token}` },
+
+        body: JSON.stringify({
+          sender: 1,
+          receiver: 2,
+          content: 'Testowa wiadomość z frontu!'
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Wysłano!', data);
+      } else {
+        const errorData = await response.json();
+        console.error('Błąd:', errorData);
+      }
+    } catch (error) {
+      console.error('Błąd połączenia:', error);
+    }
+  };
+
 
   return (
     <div>
@@ -132,16 +158,17 @@ function UserProfile({ user, onLogout }) {
       <h2>Witaj, {user.username}!</h2>
       <button onClick={onLogout}>Wyloguj się</button>
 
-      <div style={{ marginTop: "1rem" }}>
+      <div style={{marginTop: "1rem"}}>
         <button onClick={() => setView("profile")}>Profil</button>
         <button onClick={() => setView("edit")}>Zmień dane</button>
         <button onClick={() => setView("addPlant")}>Dodaj roślinę</button>
         <button onClick={() => setView("swaps")}>Moje wymiany</button>
+        <button onClick={sendTestMessage}>Wyślij testową wiadomość</button>
       </div>
 
       {view === "profile" && (
-        <div>
-          <p>Email: {user.email}</p>
+          <div>
+            <p>Email: {user.email}</p>
           <p>Lokalizacja: {user.location || "Brak"}</p>
           <p>Ostatnia aktywność: {user.last_activity}</p>
 
