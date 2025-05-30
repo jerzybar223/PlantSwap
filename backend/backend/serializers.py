@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import Uzytkownik, Plant, Swap, Message
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 class UzytkownikSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,6 +23,20 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Uzytkownik
         fields = ['username', 'email', 'password', 'password2', 'location', 'photo_url']
+
+    def validate_email(self, value):
+        try:
+            validate_email(value)
+        except ValidationError:
+            raise serializers.ValidationError("Nieprawidłowy adres e-mail.")
+        return value
+
+    def validate_username(self, value):
+        if len(value) < 3:
+            raise serializers.ValidationError("Nazwa użytkownika musi mieć co najmniej 3 znaki.")
+        if not value.isalnum():
+            raise serializers.ValidationError("Nazwa użytkownika może zawierać tylko litery i cyfry.")
+        return value
 
     def validate(self, data):
         if data['password'] != data['password2']:
@@ -48,6 +64,16 @@ class PlantSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         return request.user.is_authenticated and obj.user == request.user
 
+    def validate_name(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("Nazwa rośliny nie może być pusta.")
+        return value
+
+    def validate_description(self, value):
+        if value and len(value) > 1000:
+            raise serializers.ValidationError("Opis jest za długi (maks. 1000 znaków).")
+        return value
+
 class SwapSerializer(serializers.ModelSerializer):
     offered_plant_name = serializers.SerializerMethodField()
     requested_plant_name = serializers.SerializerMethodField()
@@ -63,6 +89,11 @@ class SwapSerializer(serializers.ModelSerializer):
     def get_requested_plant_name(self, obj):
         return obj.requested_plant.name if obj.requested_plant else None
 
+    def validate_status(self, value):
+        if value not in ['pending', 'accepted', 'rejected']:
+            raise serializers.ValidationError("Niepoprawny status. Dozwolone wartości: pending, accepted, rejected.")
+        return value
+
 class MessageSerializer(serializers.ModelSerializer):
     sender_username = serializers.CharField(source='sender.username', read_only=True)
     receiver_username = serializers.CharField(source='receiver.username', read_only=True)
@@ -71,3 +102,10 @@ class MessageSerializer(serializers.ModelSerializer):
         model = Message
         fields = ['id', 'sender', 'sender_username', 'receiver', 'receiver_username', 'content', 'sent_at']
         read_only_fields = ['id', 'sent_at', 'sender']
+
+    def validate_content(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("Wiadomość nie może być pusta.")
+        if len(value) > 2000:
+            raise serializers.ValidationError("Wiadomość jest za długa (maks. 2000 znaków).")
+        return value
