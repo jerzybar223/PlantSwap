@@ -61,9 +61,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'backend.middleware.request_validation.ValidateJSONMiddleware',
-
-
-
 ]
 
 ROOT_URLCONF = 'backend.urls'
