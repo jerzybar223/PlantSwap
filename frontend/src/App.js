@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import UserProfile from "./components/UserProfile";
@@ -130,6 +130,7 @@ function App() {
     password2: "",
     location: "",
   });
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (token) {
@@ -225,8 +226,10 @@ function App() {
       setToken(data.token);
       localStorage.setItem("token", data.token);
       setUser(data.user);
+      return true;
     } else {
       alert("Logowanie nieudane: " + JSON.stringify(data));
+      return false;
     }
   };
 
@@ -244,60 +247,43 @@ function App() {
   };
 
   return (
-    <Router>
-      <div style={{ padding: "2rem" }}>
-        <Routes>
-          <Route path="/" element={<HomePage user={user} token={token} />} />
-
-          <Route
-            path="/login"
-            element={
-              token && user ? (
-                <Navigate to="/" />
-              ) : (
-                <LoginPage
-                  formData={formData}
-                  onChange={handleChange}
-                  onLogin={handleLogin}
-                />
-              )
-            }
-          />
-
-          <Route
-            path="/register"
-            element={
-              token && user ? (
-                <Navigate to="/" />
-              ) : (
-                <RegisterPage
-                  formData={formData}
-                  onChange={handleChange}
-                  onRegister={handleRegister}
-                  setToken={setToken}
-                  setUser={setUser}
-                />
-              )
-            }
-          />
-
-          <Route
-            path="/profile"
-            element={
-              loadingUser ? (
-                <p>Ładowanie danych użytkownika...</p>
-              ) : token && user ? (
-                <UserProfile user={user} onLogout={handleLogout} />
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
-          />
-
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </div>
-    </Router>
+    <div style={{ padding: "2rem" }}>
+      <Routes>
+        <Route path="/" element={<HomePage user={user} token={token} />} />
+        <Route
+          path="/login"
+          element={
+            <LoginPage
+              formData={formData}
+              onChange={handleChange}
+              onLogin={handleLogin}
+              switchToRegister={() => navigate("/register")}
+            />
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <RegisterPage
+              formData={formData}
+              onChange={handleChange}
+              onRegister={handleRegister}
+              switchToLogin={() => navigate("/login")}
+            />
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            user ? (
+              <UserProfile user={user} token={token} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+      </Routes>
+    </div>
   );
 }
 

@@ -4,8 +4,16 @@ import { useNavigate } from "react-router-dom";
 function LoginPage({ formData, onChange, onLogin, switchToRegister }) {
   const navigate = useNavigate();
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const success = await onLogin(e);
+    if (success) {
+      navigate("/");
+    }
+  };
+
   return (
-    <form onSubmit={onLogin}>
+    <form onSubmit={handleSubmit}>
       <button type="button" onClick={() => navigate("/")}>
         🌿 LOGO
       </button>
