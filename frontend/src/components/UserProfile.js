@@ -1,152 +1,143 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-function UserProfile({ user, onLogout }) {
+function UserProfile({ user, token, onLogout }) {
   const [view, setView] = useState("profile");
   const [editData, setEditData] = useState({ ...user });
   const [plants, setPlants] = useState([]);
   const [swaps, setSwaps] = useState([]);
-  const [image, setImage] = useState(null); // Stan na obraz
-  const token = localStorage.getItem("token");
+  const [image, setImage] = useState(null);
   const navigate = useNavigate();
 
-  const translateStatus = (status) => {
-    switch (status) {
-      case "pending":
-        return "oczekujące";
-      case "accepted":
-        return "zaakceptowane";
-      case "rejected":
-        return "odrzucone";
-      default:
-        return status;
-    }
-  };
-
   useEffect(() => {
-    if (view === "swaps") {
-      fetch("http://localhost:8000/api/swaps/", {
-        headers: { Authorization: `Token ${token}` },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          const sorted = data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-          setSwaps(sorted);
-        });
-    }
-
-    if (view === "profile") {
+    if (user) {
+      // Pobierz rośliny użytkownika
       fetch("http://localhost:8000/api/user_plants/", {
         headers: { Authorization: `Token ${token}` },
       })
         .then((res) => res.json())
-        .then(setPlants)
-        .catch((err) => {
-          console.error("Błąd podczas pobierania roślin:", err);
-        });
+        .then((data) => setPlants(data))
+        .catch((err) => console.error("Błąd pobierania roślin:", err));
+
+      // Pobierz wymiany użytkownika
+      fetch("http://localhost:8000/api/swaps/", {
+        headers: { Authorization: `Token ${token}` },
+      })
+        .then((res) => res.json())
+        .then((data) => setSwaps(data))
+        .catch((err) => console.error("Błąd pobierania wymian:", err));
     }
-  }, [view, token]);
+  }, [token, user]);
+
+  const translateStatus = (status) => {
+    const statusMap = {
+      pending: "Oczekująca",
+      accepted: "Zaakceptowana",
+      rejected: "Odrzucona",
+    };
+    return statusMap[status] || status;
+  };
 
   const handleEditChange = (e) =>
     setEditData({ ...editData, [e.target.name]: e.target.value });
 
-  const handleUserUpdate = async (e) => {
-    e.preventDefault();
-    const res = await fetch("http://localhost:8000/api/users/update/", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Token ${token}`,
-      },
-      body: JSON.stringify(editData),
-    });
-
-    if (res.ok) {
-      alert("Dane zaktualizowane.");
-    } else {
-      alert("Błąd aktualizacji.");
-    }
-  };
-
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    setImage(file);
-  };
-
-  const updateSwapStatus = async (swapId, newStatus) => {
-    const res = await fetch(`http://localhost:8000/api/swaps/${swapId}/`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Token ${token}`,
-      },
-      body: JSON.stringify({ status: newStatus }),
-    });
-
-    if (res.ok) {
-      alert(`Wymiana została ${newStatus === "accepted" ? "zatwierdzona" : "odrzucona"}.`);
-      const updated = await fetch("http://localhost:8000/api/swaps/", {
-        headers: { Authorization: `Token ${token}` },
-      });
-      const data = await updated.json();
-      setSwaps(data);
-    } else {
-      alert("Błąd podczas aktualizacji statusu.");
+    if (e.target.files && e.target.files[0]) {
+      setImage(e.target.files[0]);
     }
   };
 
-  const handlePlantSubmit = async (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
+    const formData = new FormData();
+    formData.append("username", editData.username);
+    formData.append("email", editData.email);
+    formData.append("location", editData.location);
+    if (image) {
+      formData.append("photo", image);
+    }
+
+    try {
+      const res = await fetch("http://localhost:8000/api/users/update/", {
+        method: "PUT",
+        headers: { Authorization: `Token ${token}` },
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setEditData(data);
+        alert("Profil zaktualizowany!");
+      } else {
+        const error = await res.json();
+        alert("Błąd: " + JSON.stringify(error));
+      }
+    } catch (error) {
+      console.error("Błąd:", error);
+      alert("Wystąpił błąd podczas aktualizacji profilu");
+    }
+  };
+
+  const handleAddPlant = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("name", editData.plantName);
+    formData.append("description", editData.plantDescription);
     if (image) {
       formData.append("image", image);
     }
 
-    const res = await fetch("http://localhost:8000/api/plants/", {
-      method: "POST",
-      headers: {
-        Authorization: `Token ${token}`,
-      },
-      body: formData,
-    });
-
-    if (res.ok) {
-      alert("Roślina dodana!");
-      e.target.reset();
-      const updated = await fetch("http://localhost:8000/api/user_plants/", {
-        headers: { Authorization: `Token ${token}` },
-      });
-      const data = await updated.json();
-      setPlants(data);
-    } else {
-      alert("Błąd podczas dodawania rośliny.");
-    }
-  };
-
-  const sendTestMessage = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/messages/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json',
-          Authorization: `Token ${token}` },
-        body: JSON.stringify({
-          sender: 1,
-          receiver: 2,
-          content: 'Testowa wiadomość z frontu!'
-        })
+      const res = await fetch("http://localhost:8000/api/plants/", {
+        method: "POST",
+        headers: { Authorization: `Token ${token}` },
+        body: formData,
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Wysłano!', data);
+      if (res.ok) {
+        const newPlant = await res.json();
+        setPlants([...plants, newPlant]);
+        setEditData({ ...editData, plantName: "", plantDescription: "" });
+        setImage(null);
+        alert("Roślina dodana!");
       } else {
-        const errorData = await response.json();
-        console.error('Błąd:', errorData);
+        const error = await res.json();
+        alert("Błąd: " + JSON.stringify(error));
       }
     } catch (error) {
-      console.error('Błąd połączenia:', error);
+      console.error("Błąd:", error);
+      alert("Wystąpił błąd podczas dodawania rośliny");
     }
   };
+
+  const handleSwapAction = async (swapId, action) => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/swaps/${swapId}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+        body: JSON.stringify({ status: action }),
+      });
+
+      if (res.ok) {
+        const updatedSwap = await res.json();
+        setSwaps(swaps.map((s) => (s.id === swapId ? updatedSwap : s)));
+        alert(`Wymiana ${action === "accepted" ? "zaakceptowana" : "odrzucona"}!`);
+      } else {
+        const error = await res.json();
+        alert("Błąd: " + JSON.stringify(error));
+      }
+    } catch (error) {
+      console.error("Błąd:", error);
+      alert("Wystąpił błąd podczas aktualizacji wymiany");
+    }
+  };
+
+  if (!user) {
+    return <div className="text-center mt-5">Ładowanie profilu...</div>;
+  }
 
   return (
     <div className="container py-4">
@@ -252,7 +243,7 @@ function UserProfile({ user, onLogout }) {
             <div className="card">
               <div className="card-body">
                 <h3 className="card-title mb-4">Edytuj dane</h3>
-                <form onSubmit={handleUserUpdate}>
+                <form onSubmit={handleEditSubmit}>
                   <div className="mb-3">
                     <label className="form-label">Nazwa użytkownika</label>
                     <input
@@ -298,11 +289,11 @@ function UserProfile({ user, onLogout }) {
             <div className="card">
               <div className="card-body">
                 <h3 className="card-title mb-4">Dodaj nową roślinę</h3>
-                <form onSubmit={handlePlantSubmit}>
+                <form onSubmit={handleAddPlant}>
                   <div className="mb-3">
                     <label className="form-label">Nazwa rośliny</label>
                     <input 
-                      name="name" 
+                      name="plantName" 
                       className="form-control"
                       placeholder="Nazwa rośliny" 
                       required 
@@ -311,7 +302,7 @@ function UserProfile({ user, onLogout }) {
                   <div className="mb-3">
                     <label className="form-label">Opis</label>
                     <textarea 
-                      name="description" 
+                      name="plantDescription" 
                       className="form-control"
                       placeholder="Opis" 
                     />
@@ -366,13 +357,13 @@ function UserProfile({ user, onLogout }) {
                             <div className="btn-group">
                               <button
                                 className="btn btn-success"
-                                onClick={() => updateSwapStatus(swap.id, "accepted")}
+                                onClick={() => handleSwapAction(swap.id, "accepted")}
                               >
                                 Akceptuj
                               </button>
                               <button
                                 className="btn btn-danger"
-                                onClick={() => updateSwapStatus(swap.id, "rejected")}
+                                onClick={() => handleSwapAction(swap.id, "rejected")}
                               >
                                 Odrzuć
                               </button>

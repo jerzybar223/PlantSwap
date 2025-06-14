@@ -9,16 +9,18 @@ function MessagesPage({ user, token }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Pobierz listę użytkowników
-    fetch("http://localhost:8000/api/users/", {
-      headers: { Authorization: `Token ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        // Filtrujemy siebie z listy
-        setUsers(data.filter(u => u.id !== user.id));
-      });
-  }, [token, user.id]);
+    if (user) {
+      // Pobierz listę użytkowników
+      fetch("http://localhost:8000/api/users/", {
+        headers: { Authorization: `Token ${token}` },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          // Filtrujemy siebie z listy
+          setUsers(data.filter(u => u.id !== user.id));
+        });
+    }
+  }, [token, user]);
 
   useEffect(() => {
     if (selectedUser) {
@@ -28,7 +30,11 @@ function MessagesPage({ user, token }) {
       })
         .then((res) => res.json())
         .then((data) => {
-          setMessages(data);
+          // Sortujemy wiadomości od najnowszych
+          const sortedMessages = data.sort((a, b) => 
+            new Date(b.sent_at) - new Date(a.sent_at)
+          );
+          setMessages(sortedMessages);
         });
     }
   }, [selectedUser, token]);
@@ -52,7 +58,8 @@ function MessagesPage({ user, token }) {
 
       if (response.ok) {
         const sentMessage = await response.json();
-        setMessages([...messages, sentMessage]);
+        // Dodajemy nową wiadomość na początek listy
+        setMessages([sentMessage, ...messages]);
         setNewMessage("");
       } else {
         alert("Błąd podczas wysyłania wiadomości");
@@ -62,6 +69,10 @@ function MessagesPage({ user, token }) {
       alert("Błąd podczas wysyłania wiadomości");
     }
   };
+
+  if (!user) {
+    return <div className="text-center mt-5">Ładowanie wiadomości...</div>;
+  }
 
   return (
     <div className="container py-4">
