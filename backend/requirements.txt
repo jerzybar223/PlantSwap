@@ -5,6 +5,7 @@ charset-normalizer==3.4.1
 click==8.1.8
 cloudinary==1.44.0
 colorama==0.4.6
+cryptography==42.0.5
 Django==5.1.7
 django-cloudinary-storage==0.3.0
 django-cors-headers==4.7.0
