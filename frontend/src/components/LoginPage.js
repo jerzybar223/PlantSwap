@@ -1,12 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function LoginPage({ formData, onChange, onLogin, switchToRegister }) {
+function LoginPage({ onLogin }) {
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await onLogin(e);
+    const success = await onLogin(formData);
     if (success) {
       navigate("/");
     }
@@ -39,7 +47,7 @@ function LoginPage({ formData, onChange, onLogin, switchToRegister }) {
                     name="username"
                     placeholder="Nazwa użytkownika"
                     value={formData.username}
-                    onChange={onChange}
+                    onChange={handleChange}
                     required
                   />
                 </div>
@@ -51,7 +59,7 @@ function LoginPage({ formData, onChange, onLogin, switchToRegister }) {
                     name="password"
                     placeholder="Hasło"
                     value={formData.password}
-                    onChange={onChange}
+                    onChange={handleChange}
                     required
                   />
                 </div>
@@ -66,7 +74,7 @@ function LoginPage({ formData, onChange, onLogin, switchToRegister }) {
                     <button 
                       type="button" 
                       className="btn btn-link p-0" 
-                      onClick={switchToRegister}
+                      onClick={() => navigate("/register")}
                     >
                       Zarejestruj się
                     </button>

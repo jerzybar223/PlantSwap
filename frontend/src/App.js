@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import UserProfile from "./components/UserProfile";
+import MessagesPage from "./components/MessagesPage";
 
 function HomePage({ user, token, onLogout }) {
   const navigate = useNavigate();
@@ -71,6 +72,13 @@ function HomePage({ user, token, onLogout }) {
             {user ? (
               <div className="d-flex align-items-center">
                 <span className="me-3">Witaj, {user.username}!</span>
+                <button 
+                  className="btn btn-outline-primary me-2" 
+                  onClick={() => navigate("/messages")}
+                >
+                  <i className="bi bi-chat-dots me-1"></i>
+                  Wiadomości
+                </button>
                 <button 
                   className="btn btn-outline-primary me-2" 
                   onClick={() => navigate("/profile")}
@@ -275,39 +283,33 @@ function App() {
     }
   };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-
-    if (!formData.username || !formData.password) {
-      alert("Podaj nazwę użytkownika i hasło.");
-      return;
-    }
-
-    const res = await fetch("http://localhost:8000/api/login/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: formData.username,
-        password: formData.password,
-      }),
-    });
-
-    let data;
+  const handleLogin = async (formData) => {
     try {
-      data = await res.json();
-    } catch (err) {
-      const text = await res.text();
-      alert("Błąd odpowiedzi serwera: " + text);
-      return;
-    }
+      const res = await fetch("http://localhost:8000/api/login/", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "User-Agent": "PlantSwap-Web"
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password
+        }),
+      });
 
-    if (res.ok) {
-      setToken(data.token);
-      localStorage.setItem("token", data.token);
-      setUser(data.user);
-      return true;
-    } else {
-      alert("Logowanie nieudane: " + JSON.stringify(data));
+      if (res.ok) {
+        const data = await res.json();
+        setToken(data.token);
+        localStorage.setItem("token", data.token);
+        return true;
+      } else {
+        const error = await res.json();
+        alert("Błąd logowania: " + JSON.stringify(error));
+        return false;
+      }
+    } catch (error) {
+      console.error("Błąd:", error);
+      alert("Wystąpił błąd podczas logowania");
       return false;
     }
   };
@@ -329,33 +331,23 @@ function App() {
     <div style={{ padding: "2rem" }}>
       <Routes>
         <Route path="/" element={<HomePage user={user} token={token} onLogout={handleLogout} />} />
-        <Route
-          path="/login"
-          element={
-            <LoginPage
-              formData={formData}
-              onChange={handleChange}
-              onLogin={handleLogin}
-              switchToRegister={() => navigate("/register")}
-            />
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <RegisterPage
-              formData={formData}
-              onChange={handleChange}
-              onRegister={handleRegister}
-              switchToLogin={() => navigate("/login")}
-            />
-          }
-        />
+        <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+        <Route path="/register" element={<RegisterPage onRegister={handleRegister} />} />
         <Route
           path="/profile"
           element={
-            user ? (
+            token ? (
               <UserProfile user={user} token={token} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/messages"
+          element={
+            token ? (
+              <MessagesPage user={user} token={token} />
             ) : (
               <Navigate to="/login" />
             )
