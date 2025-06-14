@@ -11,18 +11,17 @@ function UserProfile({ user, onLogout }) {
   const navigate = useNavigate();
 
   const translateStatus = (status) => {
-  switch (status) {
-    case "pending":
-      return "oczekujące";
-    case "accepted":
-      return "zaakceptowane";
-    case "rejected":
-      return "odrzucone";
-    default:
-      return status;
-  }
-};
-
+    switch (status) {
+      case "pending":
+        return "oczekujące";
+      case "accepted":
+        return "zaakceptowane";
+      case "rejected":
+        return "odrzucone";
+      default:
+        return status;
+    }
+  };
 
   useEffect(() => {
     if (view === "swaps") {
@@ -123,13 +122,13 @@ function UserProfile({ user, onLogout }) {
       alert("Błąd podczas dodawania rośliny.");
     }
   };
+
   const sendTestMessage = async () => {
     try {
       const response = await fetch('http://localhost:8000/api/messages/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json',
           Authorization: `Token ${token}` },
-
         body: JSON.stringify({
           sender: 1,
           receiver: 2,
@@ -149,125 +148,240 @@ function UserProfile({ user, onLogout }) {
     }
   };
 
-
   return (
-    <div>
-      <button type="button" onClick={() => navigate("/")}>
-        🌿 LOGO
-      </button>
-      <h2>Witaj, {user.username}!</h2>
-      <button onClick={onLogout}>Wyloguj się</button>
-
-      <div style={{marginTop: "1rem"}}>
-        <button onClick={() => setView("profile")}>Profil</button>
-        <button onClick={() => setView("edit")}>Zmień dane</button>
-        <button onClick={() => setView("addPlant")}>Dodaj roślinę</button>
-        <button onClick={() => setView("swaps")}>Moje wymiany</button>
-        <button onClick={sendTestMessage}>Wyślij testową wiadomość</button>
-      </div>
-
-      {view === "profile" && (
-          <div>
-            <p>Email: {user.email}</p>
-          <p>Lokalizacja: {user.location || "Brak"}</p>
-          <p>Ostatnia aktywność: {user.last_activity}</p>
-
-          <h3>Twoje rośliny:</h3>
-          {plants.length === 0 ? (
-            <p>Nie dodałeś jeszcze żadnych roślin.</p>
-          ) : (
-            <ul>
-              {plants.map((plant) => (
-                <li key={plant.id}>
-                  <strong>{plant.name}</strong> – {plant.description}
-                  {plant.photo_url && (
-                    <div>
-                      <img
-                        src={plant.photo_url}
-                        alt={plant.name}
-                        width="100"
-                      />
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
+    <div className="container py-4">
+      <nav className="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <div className="container-fluid">
+          <button 
+            className="btn btn-link text-decoration-none" 
+            onClick={() => navigate("/")}
+          >
+            <i className="bi bi-flower1 fs-1"></i>
+            <span className="h3 ms-2">PlantSwap</span>
+          </button>
+          
+          <div className="ms-auto">
+            <button 
+              className="btn btn-outline-danger" 
+              onClick={onLogout}
+            >
+              Wyloguj się
+            </button>
+          </div>
         </div>
-      )}
+      </nav>
 
-      {view === "edit" && (
-        <form onSubmit={handleUserUpdate}>
-          <h3>Edytuj dane</h3>
-          <input
-            type="text"
-            name="username"
-            value={editData.username}
-            onChange={handleEditChange}
-            placeholder="Nazwa użytkownika"
-          />
-          <br />
-          <input
-            type="email"
-            name="email"
-            value={editData.email}
-            onChange={handleEditChange}
-            placeholder="Email"
-          />
-          <br />
-          <input
-            type="text"
-            name="location"
-            value={editData.location || ""}
-            onChange={handleEditChange}
-            placeholder="Lokalizacja"
-          />
-          <br />
-          <button type="submit">Zapisz zmiany</button>
-        </form>
-      )}
+      <div className="row">
+        <div className="col-md-3">
+          <div className="card mb-4">
+            <div className="card-body">
+              <h5 className="card-title">Witaj, {user.username}!</h5>
+              <div className="d-grid gap-2">
+                <button 
+                  className={`btn ${view === "profile" ? "btn-primary" : "btn-outline-primary"}`}
+                  onClick={() => setView("profile")}
+                >
+                  Profil
+                </button>
+                <button 
+                  className={`btn ${view === "edit" ? "btn-primary" : "btn-outline-primary"}`}
+                  onClick={() => setView("edit")}
+                >
+                  Zmień dane
+                </button>
+                <button 
+                  className={`btn ${view === "addPlant" ? "btn-primary" : "btn-outline-primary"}`}
+                  onClick={() => setView("addPlant")}
+                >
+                  Dodaj roślinę
+                </button>
+                <button 
+                  className={`btn ${view === "swaps" ? "btn-primary" : "btn-outline-primary"}`}
+                  onClick={() => setView("swaps")}
+                >
+                  Moje wymiany
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      {view === "addPlant" && (
-        <form onSubmit={handlePlantSubmit}>
-          <h3>Dodaj nową roślinę</h3>
-          <input name="name" placeholder="Nazwa rośliny" required />
-          <br />
-          <textarea name="description" placeholder="Opis" />
-          <br />
-          <input type="file" name="image" accept="image/*" onChange={handleImageChange} />
-          <br />
-          <button type="submit">Dodaj</button>
-        </form>
-      )}
-
-      {view === "swaps" && (
-        <div>
-          <h3>Moje wymiany</h3>
-          {swaps.length === 0 ? (
-            <p>Brak propozycji wymian.</p>
-          ) : (
-            swaps.map((swap) => (
-                <div key={swap.id} style={{border: "1px solid #ccc", marginBottom: "1rem", padding: "1rem"}}>
-                  <p>Ty oferujesz: <strong>{swap.offered_plant_name}</strong></p>
-                  <p>Ty chcesz: <strong>{swap.requested_plant_name}</strong></p>
-                  <p>Status: <strong>{translateStatus(swap.status)}</strong></p>
-
-
-                  {swap.status === "pending" && swap.requested_plant_owner_id === Number(user.id) && (
-                      <div>
-                        <button onClick={() => updateSwapStatus(swap.id, "accepted")}>Zatwierdź</button>
-                        {" "}
-                        <button onClick={() => updateSwapStatus(swap.id, "rejected")}>Odrzuć</button>
-                      </div>
-                  )}
-
-
+        <div className="col-md-9">
+          {view === "profile" && (
+            <div className="card">
+              <div className="card-body">
+                <h3 className="card-title mb-4">Informacje o profilu</h3>
+                <div className="mb-3">
+                  <p className="mb-1"><strong>Email:</strong> {user.email}</p>
+                  <p className="mb-1"><strong>Lokalizacja:</strong> {user.location || "Brak"}</p>
+                  <p className="mb-1"><strong>Ostatnia aktywność:</strong> {user.last_activity}</p>
                 </div>
-            ))
+
+                <h4 className="mt-4 mb-3">Twoje rośliny</h4>
+                {plants.length === 0 ? (
+                  <div className="alert alert-info">
+                    Nie dodałeś jeszcze żadnych roślin.
+                  </div>
+                ) : (
+                  <div className="row row-cols-1 row-cols-md-2 g-4">
+                    {plants.map((plant) => (
+                      <div key={plant.id} className="col">
+                        <div className="card h-100">
+                          {plant.photo_url && (
+                            <img
+                              src={plant.photo_url}
+                              className="card-img-top"
+                              alt={plant.name}
+                              style={{ height: "200px", objectFit: "cover" }}
+                            />
+                          )}
+                          <div className="card-body">
+                            <h5 className="card-title">{plant.name}</h5>
+                            <p className="card-text">{plant.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {view === "edit" && (
+            <div className="card">
+              <div className="card-body">
+                <h3 className="card-title mb-4">Edytuj dane</h3>
+                <form onSubmit={handleUserUpdate}>
+                  <div className="mb-3">
+                    <label className="form-label">Nazwa użytkownika</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="username"
+                      value={editData.username}
+                      onChange={handleEditChange}
+                      placeholder="Nazwa użytkownika"
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Email</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      name="email"
+                      value={editData.email}
+                      onChange={handleEditChange}
+                      placeholder="Email"
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Lokalizacja</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="location"
+                      value={editData.location || ""}
+                      onChange={handleEditChange}
+                      placeholder="Lokalizacja"
+                    />
+                  </div>
+                  <button type="submit" className="btn btn-primary">
+                    Zapisz zmiany
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {view === "addPlant" && (
+            <div className="card">
+              <div className="card-body">
+                <h3 className="card-title mb-4">Dodaj nową roślinę</h3>
+                <form onSubmit={handlePlantSubmit}>
+                  <div className="mb-3">
+                    <label className="form-label">Nazwa rośliny</label>
+                    <input 
+                      name="name" 
+                      className="form-control"
+                      placeholder="Nazwa rośliny" 
+                      required 
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Opis</label>
+                    <textarea 
+                      name="description" 
+                      className="form-control"
+                      placeholder="Opis" 
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Zdjęcie</label>
+                    <input 
+                      type="file" 
+                      className="form-control"
+                      name="image" 
+                      accept="image/*" 
+                      onChange={handleImageChange} 
+                    />
+                  </div>
+                  <button type="submit" className="btn btn-primary">
+                    Dodaj
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {view === "swaps" && (
+            <div className="card">
+              <div className="card-body">
+                <h3 className="card-title mb-4">Moje wymiany</h3>
+                {swaps.length === 0 ? (
+                  <div className="alert alert-info">
+                    Brak propozycji wymian.
+                  </div>
+                ) : (
+                  <div className="list-group">
+                    {swaps.map((swap) => (
+                      <div key={swap.id} className="list-group-item">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <h5 className="mb-1">Wymiana #{swap.id}</h5>
+                            <p className="mb-1">
+                              <strong>Status:</strong> {translateStatus(swap.status)}
+                            </p>
+                            <p className="mb-1">
+                              <strong>Data:</strong> {new Date(swap.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                          {swap.status === "pending" && (
+                            <div className="btn-group">
+                              <button
+                                className="btn btn-success"
+                                onClick={() => updateSwapStatus(swap.id, "accepted")}
+                              >
+                                Akceptuj
+                              </button>
+                              <button
+                                className="btn btn-danger"
+                                onClick={() => updateSwapStatus(swap.id, "rejected")}
+                              >
+                                Odrzuć
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
-      )}
-
+      </div>
     </div>
   );
 }

@@ -4,7 +4,7 @@ import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import UserProfile from "./components/UserProfile";
 
-function HomePage({ user, token }) {
+function HomePage({ user, token, onLogout }) {
   const navigate = useNavigate();
   const [recentPlants, setRecentPlants] = useState([]);
   const [userPlants, setUserPlants] = useState([]);
@@ -56,63 +56,142 @@ function HomePage({ user, token }) {
   };
 
   return (
-    <div>
-      <button onClick={() => navigate("/")}>🌿 LOGO</button>
-      {user ? (
-        <div>
-          <p>Witaj, {user.username}!</p>
-          <button onClick={() => navigate("/profile")}>Mój profil</button>
+    <div className="container py-4">
+      <nav className="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <div className="container-fluid">
+          <button 
+            className="btn btn-link text-decoration-none" 
+            onClick={() => navigate("/")}
+          >
+            <i className="bi bi-flower1 fs-1"></i>
+            <span className="h3 ms-2">PlantSwap</span>
+          </button>
+          
+          <div className="ms-auto">
+            {user ? (
+              <div className="d-flex align-items-center">
+                <span className="me-3">Witaj, {user.username}!</span>
+                <button 
+                  className="btn btn-outline-primary me-2" 
+                  onClick={() => navigate("/profile")}
+                >
+                  Mój profil
+                </button>
+                <button 
+                  className="btn btn-outline-danger" 
+                  onClick={onLogout}
+                >
+                  Wyloguj się
+                </button>
+              </div>
+            ) : (
+              <div>
+                <button 
+                  className="btn btn-outline-primary me-2" 
+                  onClick={() => navigate("/login")}
+                >
+                  Zaloguj się
+                </button>
+                <button 
+                  className="btn btn-primary" 
+                  onClick={() => navigate("/register")}
+                >
+                  Zarejestruj się
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      <h2 className="mb-4">Ostatnie ogłoszenia:</h2>
+      
+      {recentPlants.length === 0 ? (
+        <div className="alert alert-info">
+          Brak ogłoszeń do wyświetlenia.
         </div>
       ) : (
-        <>
-          <button onClick={() => navigate("/login")}>Zaloguj się</button>{" "}
-          <button onClick={() => navigate("/register")}>Zarejestruj się</button>
-        </>
-      )}
-
-      <h2>Ostatnie ogłoszenia:</h2>
-      {recentPlants.length === 0 ? (
-        <p>Brak ogłoszeń do wyświetlenia.</p>
-      ) : (
-        <ul>
+        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
           {recentPlants.map((plant) => (
-            <li key={plant.id}>
-              <strong>{plant.name}</strong> – {plant.description}
-              {plant.photo_url && (
-                <div>
-                  <img src={plant.photo_url} alt={plant.name} width="100" />
+            <div key={plant.id} className="col">
+              <div className="card h-100">
+                {plant.photo_url && (
+                  <img 
+                    src={plant.photo_url} 
+                    className="card-img-top" 
+                    alt={plant.name} 
+                    style={{ height: "200px", objectFit: "cover" }}
+                  />
+                )}
+                <div className="card-body">
+                  <h5 className="card-title">{plant.name}</h5>
+                  <p className="card-text">{plant.description}</p>
+                  {user && plant.user !== user.id && (
+                    <button 
+                      className="btn btn-primary" 
+                      onClick={() => openSwapModal(plant)}
+                    >
+                      Wymień
+                    </button>
+                  )}
                 </div>
-              )}
-
-              {user && plant.user !== user.id && (
-                <button onClick={() => openSwapModal(plant)}>Wymień</button>
-              )}
-            </li>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
 
       {requestedPlant && (
-        <div style={{ marginTop: "2rem", padding: "1rem", border: "1px solid gray" }}>
-          <h3>Proponujesz wymianę za: <strong>{requestedPlant.name}</strong></h3>
-          <label>Wybierz jedną ze swoich roślin:</label>
-          <select
-            value={selectedPlantToSwap?.id || ""}
-            onChange={(e) => {
-              const selected = userPlants.find((p) => p.id === parseInt(e.target.value));
-              setSelectedPlantToSwap(selected);
-            }}
-          >
-            <option value="">-- wybierz --</option>
-            {userPlants.map((plant) => (
-              <option key={plant.id} value={plant.id}>
-                {plant.name}
-              </option>
-            ))}
-          </select>
-          <br />
-          <button onClick={submitSwap} disabled={!selectedPlantToSwap}>Zaproponuj wymianę</button>{" "}
-          <button onClick={() => setRequestedPlant(null)}>Anuluj</button>
+        <div className="modal fade show" style={{ display: "block" }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  Proponujesz wymianę za: <strong>{requestedPlant.name}</strong>
+                </h5>
+                <button 
+                  type="button" 
+                  className="btn-close" 
+                  onClick={() => setRequestedPlant(null)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <label className="form-label">Wybierz jedną ze swoich roślin:</label>
+                  <select
+                    className="form-select"
+                    value={selectedPlantToSwap?.id || ""}
+                    onChange={(e) => {
+                      const selected = userPlants.find((p) => p.id === parseInt(e.target.value));
+                      setSelectedPlantToSwap(selected);
+                    }}
+                  >
+                    <option value="">-- wybierz --</option>
+                    {userPlants.map((plant) => (
+                      <option key={plant.id} value={plant.id}>
+                        {plant.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button 
+                  className="btn btn-secondary" 
+                  onClick={() => setRequestedPlant(null)}
+                >
+                  Anuluj
+                </button>
+                <button 
+                  className="btn btn-primary" 
+                  onClick={submitSwap} 
+                  disabled={!selectedPlantToSwap}
+                >
+                  Zaproponuj wymianę
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -249,7 +328,7 @@ function App() {
   return (
     <div style={{ padding: "2rem" }}>
       <Routes>
-        <Route path="/" element={<HomePage user={user} token={token} />} />
+        <Route path="/" element={<HomePage user={user} token={token} onLogout={handleLogout} />} />
         <Route
           path="/login"
           element={
