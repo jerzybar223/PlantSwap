@@ -350,13 +350,19 @@ function UserProfile({ user, onLogout }) {
                           <div>
                             <h5 className="mb-1">Wymiana #{swap.id}</h5>
                             <p className="mb-1">
+                              <strong>Oferujesz:</strong> {swap.offered_plant_name}
+                            </p>
+                            <p className="mb-1">
+                              <strong>Chcesz otrzymać:</strong> {swap.requested_plant_name}
+                            </p>
+                            <p className="mb-1">
                               <strong>Status:</strong> {translateStatus(swap.status)}
                             </p>
                             <p className="mb-1">
                               <strong>Data:</strong> {new Date(swap.created_at).toLocaleDateString()}
                             </p>
                           </div>
-                          {swap.status === "pending" && (
+                          {swap.status === "pending" && swap.requested_plant_owner_id === Number(user.id) && (
                             <div className="btn-group">
                               <button
                                 className="btn btn-success"
