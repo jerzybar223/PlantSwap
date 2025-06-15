@@ -48,9 +48,9 @@ function MessagesPage({ user, token }) {
       })
         .then((res) => res.json())
         .then((data) => {
-          // Sortujemy wiadomości od najnowszych
+          // Ustawiamy wiadomości od najstarszej do najnowszej
           const sortedMessages = data.sort((a, b) => 
-            new Date(b.sent_at) - new Date(a.sent_at)
+            new Date(a.sent_at) - new Date(b.sent_at)
           );
           setMessages(sortedMessages);
           
@@ -58,7 +58,7 @@ function MessagesPage({ user, token }) {
           if (sortedMessages.length > 0) {
             setLastMessageDates(prev => ({
               ...prev,
-              [selectedUser.id]: sortedMessages[0].sent_at
+              [selectedUser.id]: sortedMessages[sortedMessages.length - 1].sent_at
             }));
           }
         });
@@ -84,8 +84,8 @@ function MessagesPage({ user, token }) {
 
       if (response.ok) {
         const sentMessage = await response.json();
-        // Dodajemy nową wiadomość na początek listy
-        setMessages([sentMessage, ...messages]);
+        // Dodajemy nową wiadomość na koniec listy
+        setMessages([...messages, sentMessage]);
         // Aktualizujemy datę ostatniej wiadomości
         setLastMessageDates(prev => ({
           ...prev,
