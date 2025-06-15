@@ -6,6 +6,7 @@ function MessagesPage({ user, token }) {
   const [selectedUser, setSelectedUser] = useState(null);
   const [newMessage, setNewMessage] = useState("");
   const [users, setUsers] = useState([]);
+  const [lastMessageDates, setLastMessageDates] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,7 +18,24 @@ function MessagesPage({ user, token }) {
         .then((res) => res.json())
         .then((data) => {
           // Filtrujemy siebie z listy
-          setUsers(data.filter(u => u.id !== user.id));
+          const filteredUsers = data.filter(u => u.id !== user.id);
+          setUsers(filteredUsers);
+          
+          // Pobierz daty ostatnich wiadomości dla każdego użytkownika
+          filteredUsers.forEach(u => {
+            fetch(`http://localhost:8000/api/messages/with/${u.id}/`, {
+              headers: { Authorization: `Token ${token}` },
+            })
+              .then((res) => res.json())
+              .then((messages) => {
+                if (messages.length > 0) {
+                  setLastMessageDates(prev => ({
+                    ...prev,
+                    [u.id]: messages[0].sent_at
+                  }));
+                }
+              });
+          });
         });
     }
   }, [token, user]);
@@ -35,6 +53,14 @@ function MessagesPage({ user, token }) {
             new Date(b.sent_at) - new Date(a.sent_at)
           );
           setMessages(sortedMessages);
+          
+          // Aktualizuj datę ostatniej wiadomości
+          if (sortedMessages.length > 0) {
+            setLastMessageDates(prev => ({
+              ...prev,
+              [selectedUser.id]: sortedMessages[0].sent_at
+            }));
+          }
         });
     }
   }, [selectedUser, token]);
@@ -60,6 +86,11 @@ function MessagesPage({ user, token }) {
         const sentMessage = await response.json();
         // Dodajemy nową wiadomość na początek listy
         setMessages([sentMessage, ...messages]);
+        // Aktualizujemy datę ostatniej wiadomości
+        setLastMessageDates(prev => ({
+          ...prev,
+          [selectedUser.id]: sentMessage.sent_at
+        }));
         setNewMessage("");
       } else {
         alert("Błąd podczas wysyłania wiadomości");
@@ -73,6 +104,38 @@ function MessagesPage({ user, token }) {
   if (!user) {
     return <div className="text-center mt-5">Ładowanie wiadomości...</div>;
   }
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now - date;
+    
+    // Jeśli wiadomość jest z dzisiaj, pokaż tylko godzinę
+    if (diff < 24 * 60 * 60 * 1000) {
+      return date.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+    }
+    // Jeśli wiadomość jest z tego tygodnia, pokaż dzień tygodnia i godzinę
+    if (diff < 7 * 24 * 60 * 60 * 1000) {
+      return date.toLocaleDateString('pl-PL', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+    }
+    // W przeciwnym razie pokaż pełną datę
+    return date.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: '2-digit' });
+  };
+
+  // Sort users by last message date (descending), users with no messages at the end
+  const sortedUsers = [...users].sort((a, b) => {
+    const dateA = lastMessageDates[a.id] ? new Date(lastMessageDates[a.id]) : null;
+    const dateB = lastMessageDates[b.id] ? new Date(lastMessageDates[b.id]) : null;
+    if (dateA && dateB) {
+      return dateB - dateA;
+    } else if (dateA) {
+      return -1;
+    } else if (dateB) {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
 
   return (
     <div className="container py-4">
@@ -95,7 +158,7 @@ function MessagesPage({ user, token }) {
               <h5 className="card-title mb-0">Konwersacje</h5>
             </div>
             <div className="list-group list-group-flush">
-              {users.map((u) => (
+              {sortedUsers.map((u) => (
                 <button
                   key={u.id}
                   className={`list-group-item list-group-item-action ${
@@ -106,7 +169,14 @@ function MessagesPage({ user, token }) {
                   <div className="d-flex align-items-center">
                     <div className="flex-grow-1">
                       <h6 className="mb-0">{u.username}</h6>
-                      <small className="text-muted">{u.location || "Brak lokalizacji"}</small>
+                      <div className="d-flex justify-content-between align-items-center">
+                        <small className="text-muted">{u.location || "Brak lokalizacji"}</small>
+                        {lastMessageDates[u.id] && (
+                          <small className="text-muted ms-2">
+                            {formatDate(lastMessageDates[u.id])}
+                          </small>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </button>
@@ -142,7 +212,7 @@ function MessagesPage({ user, token }) {
                       >
                         <div className="message-content">{message.content}</div>
                         <small className="text-muted d-block mt-1">
-                          {new Date(message.sent_at).toLocaleString()}
+                          {formatDate(message.sent_at)}
                         </small>
                       </div>
                     </div>
