@@ -26,13 +26,7 @@ function RegisterPage({ formData, onChange, onRegister, switchToLogin }) {
         <div style={{ display: "flex", alignItems: "center", height: 110 }}>
           {/* Logo placeholder */}
           <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => navigate("/") }>
-            <svg width="90" height="70" viewBox="0 0 90 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="45" cy="35" rx="35" ry="22" fill="#b9e3c6" />
-              <path d="M45 15 Q52 35 75 35 Q52 35 45 55 Q38 35 15 35 Q38 35 45 15 Z" fill="#a3b6e3" />
-            </svg>
-            <span style={{ fontFamily: 'Arial Rounded MT Bold, Arial, sans-serif', fontSize: 48, color: '#7ed957', marginLeft: 18, letterSpacing: 2, textShadow: '1px 1px 2px #888' }}>
-              FloraSoft
-            </span>
+            <img src={require("../logoflora.png")} alt="FloraSoft logo" style={{ height: 400, width: "auto", marginRight: 18, position: "absolute", left: 0, top: -145 }} />
           </div>
         </div>
         <button
