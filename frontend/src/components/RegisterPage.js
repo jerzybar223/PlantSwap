@@ -15,38 +15,32 @@ function RegisterPage({ formData, onChange, onRegister, switchToLogin }) {
   return (
     <div style={{ minHeight: "100vh", background: "#f5f6f8" }}>
       {/* Top bar */}
-      <div style={{
-        background: "#bfc0c5",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        height: 110,
-        padding: "0 60px 0 40px"
-      }}>
-        <div style={{ display: "flex", alignItems: "center", height: 110 }}>
-          {/* Logo placeholder */}
-          <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => navigate("/") }>
-            <img src={require("../logoflora.png")} alt="FloraSoft logo" style={{ height: 400, width: "auto", marginRight: 18, position: "absolute", left: 0, top: -145 }} />
-          </div>
+      <div style={{ background: "#bfc0c5", height: 110, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 60px 0 40px", boxShadow: "0 2px 8px #bbb", position: "relative", overflow: "visible" }}>
+        <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => navigate("/") }>
+          <img src={require("../logoflora.png")} alt="FloraSoft logo" style={{ height: 400, width: "auto", marginRight: 18, position: "absolute", left: 0, top: -145 }} />
         </div>
-        <button
-          style={{
-            background: "#bfc0c5",
-            color: "#fff",
-            fontSize: 44,
-            border: "none",
-            borderRadius: 36,
-            padding: "6px 60px",
-            fontWeight: 400,
-            cursor: "pointer",
-            boxShadow: "none",
-            transition: "background 0.2s",
-            opacity: 0.7
-          }}
-          onClick={switchToLogin}
-        >
-          Zaloguj
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          <button
+            style={{
+              background: "#bfc0c5",
+              color: "#fff",
+              fontSize: 28,
+              border: "none",
+              borderRadius: 30,
+              padding: "8px 36px",
+              fontWeight: 400,
+              cursor: "pointer",
+              boxShadow: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              opacity: 0.7
+            }}
+            onClick={switchToLogin}
+          >
+            <span style={{ fontSize: 28, marginRight: 8 }}>👤</span>Zaloguj
+          </button>
+        </div>
       </div>
 
       {/* Registration form */}
