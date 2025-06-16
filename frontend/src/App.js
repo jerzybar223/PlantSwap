@@ -21,11 +21,9 @@ function HomePage({ user, token, onLogout }) {
 
   const openSwapModal = async (plant) => {
     if (!user || !token) return alert("Musisz być zalogowany, by zaproponować wymianę.");
-
     const res = await fetch("http://localhost:8000/api/user_plants/", {
       headers: { Authorization: `Token ${token}` },
     });
-
     const data = await res.json();
     setUserPlants(data);
     setRequestedPlant(plant);
@@ -33,7 +31,6 @@ function HomePage({ user, token, onLogout }) {
 
   const submitSwap = async () => {
     if (!selectedPlantToSwap || !requestedPlant) return;
-
     const res = await fetch("http://localhost:8000/api/swaps/", {
       method: "POST",
       headers: {
@@ -45,7 +42,6 @@ function HomePage({ user, token, onLogout }) {
         requested_plant: requestedPlant.id,
       }),
     });
-
     if (res.ok) {
       alert("Propozycja wymiany została wysłana!");
       setSelectedPlantToSwap(null);
@@ -57,97 +53,204 @@ function HomePage({ user, token, onLogout }) {
   };
 
   return (
-    <div className="container py-4">
-      <nav className="navbar navbar-expand-lg navbar-light bg-light mb-4">
-        <div className="container-fluid">
-          <button 
-            className="btn btn-link text-decoration-none" 
-            onClick={() => navigate("/")}
+    <div style={{ minHeight: "100vh", background: "#ededed" }}>
+      {/* Header */}
+      <div style={{ background: "#bfc0c5", height: 110, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 60px 0 40px", boxShadow: "0 2px 8px #bbb" }}>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          {/* Logo */}
+          <svg width="90" height="70" viewBox="0 0 90 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="45" cy="35" rx="35" ry="22" fill="#b9e3c6" />
+            <path d="M45 15 Q52 35 75 35 Q52 35 45 55 Q38 35 15 35 Q38 35 45 15 Z" fill="#a3b6e3" />
+          </svg>
+          <span style={{ fontFamily: 'Arial Rounded MT Bold, Arial, sans-serif', fontSize: 48, color: '#7ed957', marginLeft: 18, letterSpacing: 2, textShadow: '1px 1px 2px #888' }}>
+            FloraSoft
+          </span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          <button
+            style={{
+              background: "#bfc0c5",
+              color: "#fff",
+              fontSize: 28,
+              border: "none",
+              borderRadius: 30,
+              padding: "8px 36px",
+              fontWeight: 400,
+              cursor: "pointer",
+              boxShadow: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              opacity: 0.7
+            }}
+            onClick={() => navigate("/messages")}
           >
-            <i className="bi bi-flower1 fs-1"></i>
-            <span className="h3 ms-2">PlantSwap</span>
+            <span style={{ fontSize: 28, marginRight: 8 }}>💬</span>Wiadomości
           </button>
-          
-          <div className="ms-auto">
-            {user ? (
-              <div className="d-flex align-items-center">
-                <span className="me-3">Witaj, {user.username}!</span>
-                <button 
-                  className="btn btn-outline-primary me-2" 
-                  onClick={() => navigate("/messages")}
-                >
-                  <i className="bi bi-chat-dots me-1"></i>
-                  Wiadomości
-                </button>
-                <button 
-                  className="btn btn-outline-primary me-2" 
-                  onClick={() => navigate("/profile")}
-                >
-                  Mój profil
-                </button>
-                <button 
-                  className="btn btn-outline-danger" 
-                  onClick={onLogout}
-                >
-                  Wyloguj się
-                </button>
-              </div>
-            ) : (
-              <div>
-                <button 
-                  className="btn btn-outline-primary me-2" 
-                  onClick={() => navigate("/login")}
-                >
-                  Zaloguj się
-                </button>
-                <button 
-                  className="btn btn-primary" 
-                  onClick={() => navigate("/register")}
-                >
-                  Zarejestruj się
-                </button>
-              </div>
-            )}
-          </div>
+          <button
+            style={{
+              background: "#bfc0c5",
+              color: "#fff",
+              fontSize: 28,
+              border: "none",
+              borderRadius: 30,
+              padding: "8px 36px",
+              fontWeight: 400,
+              cursor: "pointer",
+              boxShadow: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              opacity: 0.7
+            }}
+            onClick={() => navigate("/profile")}
+          >
+            <span style={{ fontSize: 28, marginRight: 8 }}>👤</span>Moje Konto
+          </button>
+          {user && (
+            <button
+              style={{
+                background: "#fff",
+                color: "#bfc0c5",
+                fontSize: 22,
+                border: "1px solid #bfc0c5",
+                borderRadius: 18,
+                padding: "6px 24px",
+                fontWeight: 500,
+                cursor: "pointer",
+                marginLeft: 18,
+                boxShadow: "none",
+                transition: "background 0.2s",
+              }}
+              onClick={onLogout}
+            >
+              Wyloguj się
+            </button>
+          )}
         </div>
-      </nav>
+      </div>
 
-      <h2 className="mb-4">Ostatnie ogłoszenia:</h2>
-      
-      {recentPlants.length === 0 ? (
-        <div className="alert alert-info">
-          Brak ogłoszeń do wyświetlenia.
-        </div>
-      ) : (
-        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      {/* Main board */}
+      <div style={{ display: "flex", justifyContent: "center", gap: 60, marginTop: 50 }}>
+        {/* Najnowsze */}
+        <div style={{ width: 520 }}>
+          {/* <h2 style={{ color: "#bfc0c5", fontSize: 44, fontWeight: 400, marginBottom: 10, marginLeft: 10, letterSpacing: 1 }}>Najnowsze</h2> */}
+          {/* <hr style={{ border: 0, borderTop: "2px solid #e0e0e0", marginBottom: 36 }} /> */}
           {recentPlants.map((plant) => (
-            <div key={plant.id} className="col">
-              <div className="card h-100">
-                {plant.photo_url && (
-                  <img 
-                    src={plant.photo_url} 
-                    className="card-img-top" 
-                    alt={plant.name} 
-                    style={{ height: "200px", objectFit: "cover" }}
-                  />
-                )}
-                <div className="card-body">
-                  <h5 className="card-title">{plant.name}</h5>
-                  <p className="card-text">{plant.description}</p>
-                  {user && plant.user !== user.id && (
-                    <button 
-                      className="btn btn-primary" 
-                      onClick={() => openSwapModal(plant)}
-                    >
-                      Wymień
-                    </button>
-                  )}
+            <div key={plant.id} style={{
+              display: "flex",
+              alignItems: "center",
+              background: "#d6d6d6",
+              borderRadius: 48,
+              marginBottom: 38,
+              padding: 24,
+              boxShadow: "none",
+              minHeight: 140,
+              gap: 24,
+              flexWrap: "wrap",
+              overflow: "hidden"
+            }}>
+              {plant.photo_url && (
+                <img
+                  src={plant.photo_url}
+                  alt={plant.name}
+                  style={{ width: 120, height: 90, objectFit: "cover", borderRadius: 20, marginRight: 18, flexShrink: 0 }}
+                />
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 36, fontWeight: 700, color: "#444", marginBottom: 6, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 220 }}>{plant.name}</div>
+                <div style={{ fontSize: 18, color: "#555", marginBottom: 8, lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 220 }}>{plant.description}</div>
+                <div style={{ fontSize: 20, color: "#b48e9c", fontWeight: 700, display: "flex", alignItems: "center" }}>
+                  <span style={{ fontSize: 20, marginRight: 6 }}>📍</span><span style={{fontWeight: 700}}>{plant.location || "Rzeszów"}</span>
                 </div>
               </div>
+              {user && plant.user !== user.id && (
+                <button
+                  onClick={() => openSwapModal(plant)}
+                  style={{
+                    background: "#b6ef9b",
+                    color: "#fff",
+                    fontSize: 24,
+                    border: "none",
+                    borderRadius: 30,
+                    padding: "8px 32px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    marginLeft: "auto",
+                    boxShadow: "none",
+                    transition: "background 0.2s",
+                    maxWidth: 160,
+                    minWidth: 120,
+                    whiteSpace: "nowrap",
+                    flexShrink: 0
+                  }}
+                >
+                  Wymień
+                </button>
+              )}
             </div>
           ))}
         </div>
-      )}
+        {/* Popularne */}
+        <div style={{ width: 520 }}>
+          {/* <h2 style={{ color: "#bfc0c5", fontSize: 44, fontWeight: 400, marginBottom: 10, marginLeft: 10, letterSpacing: 1 }}>Popularne</h2> */}
+          {/* <hr style={{ border: 0, borderTop: "2px solid #e0e0e0", marginBottom: 36 }} /> */}
+          {recentPlants.map((plant) => (
+            <div key={plant.id} style={{
+              display: "flex",
+              alignItems: "center",
+              background: "#d6d6d6",
+              borderRadius: 48,
+              marginBottom: 38,
+              padding: 24,
+              boxShadow: "none",
+              minHeight: 140,
+              gap: 24,
+              flexWrap: "wrap",
+              overflow: "hidden"
+            }}>
+              {plant.photo_url && (
+                <img
+                  src={plant.photo_url}
+                  alt={plant.name}
+                  style={{ width: 120, height: 90, objectFit: "cover", borderRadius: 20, marginRight: 18, flexShrink: 0 }}
+                />
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 36, fontWeight: 700, color: "#444", marginBottom: 6, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 220 }}>{plant.name}</div>
+                <div style={{ fontSize: 18, color: "#555", marginBottom: 8, lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 220 }}>{plant.description}</div>
+                <div style={{ fontSize: 20, color: "#b48e9c", fontWeight: 700, display: "flex", alignItems: "center" }}>
+                  <span style={{ fontSize: 20, marginRight: 6 }}>📍</span><span style={{fontWeight: 700}}>{plant.location || "Rzeszów"}</span>
+                </div>
+              </div>
+              {user && plant.user !== user.id && (
+                <button
+                  onClick={() => openSwapModal(plant)}
+                  style={{
+                    background: "#b6ef9b",
+                    color: "#fff",
+                    fontSize: 24,
+                    border: "none",
+                    borderRadius: 30,
+                    padding: "8px 32px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    marginLeft: "auto",
+                    boxShadow: "none",
+                    transition: "background 0.2s",
+                    maxWidth: 160,
+                    minWidth: 120,
+                    whiteSpace: "nowrap",
+                    flexShrink: 0
+                  }}
+                >
+                  Wymień
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
 
       {requestedPlant && (
         <div className="modal fade show" style={{ display: "block" }}>
