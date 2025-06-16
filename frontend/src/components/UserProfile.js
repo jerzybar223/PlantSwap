@@ -140,249 +140,284 @@ function UserProfile({ user, token, onLogout }) {
   }
 
   return (
-    <div className="container py-4">
-      <nav className="navbar navbar-expand-lg navbar-light bg-light mb-4">
-        <div className="container-fluid">
-          <button 
-            className="btn btn-link text-decoration-none" 
-            onClick={() => navigate("/")}
+    <div style={{ minHeight: "100vh", background: "#ededed" }}>
+      {/* Header */}
+      <div style={{ background: "#bfc0c5", height: 110, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 60px 0 40px", boxShadow: "0 2px 8px #bbb" }}>
+        <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => navigate("/") }>
+          <svg width="90" height="70" viewBox="0 0 90 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="45" cy="35" rx="35" ry="22" fill="#b9e3c6" />
+            <path d="M45 15 Q52 35 75 35 Q52 35 45 55 Q38 35 15 35 Q38 35 45 15 Z" fill="#a3b6e3" />
+          </svg>
+          <span style={{ fontFamily: 'Arial Rounded MT Bold, Arial, sans-serif', fontSize: 48, color: '#7ed957', marginLeft: 18, letterSpacing: 2, textShadow: '1px 1px 2px #888' }}>
+            FloraSoft
+          </span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          <button
+            style={{
+              background: "#bfc0c5",
+              color: "#fff",
+              fontSize: 28,
+              border: "none",
+              borderRadius: 30,
+              padding: "8px 36px",
+              fontWeight: 400,
+              cursor: "pointer",
+              boxShadow: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              opacity: 0.7
+            }}
+            onClick={() => navigate("/messages")}
           >
-            <i className="bi bi-flower1 fs-1"></i>
-            <span className="h3 ms-2">PlantSwap</span>
+            <span style={{ fontSize: 28, marginRight: 8 }}>💬</span>Wiadomości
           </button>
-          
-          <div className="ms-auto">
-            <button 
-              className="btn btn-outline-danger" 
-              onClick={onLogout}
-            >
-              Wyloguj się
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      <div className="row">
-        <div className="col-md-3">
-          <div className="card mb-4">
-            <div className="card-body">
-              <h5 className="card-title">Witaj, {user.username}!</h5>
-              <div className="d-grid gap-2">
-                <button 
-                  className={`btn ${view === "profile" ? "btn-primary" : "btn-outline-primary"}`}
-                  onClick={() => setView("profile")}
-                >
-                  Profil
-                </button>
-                <button 
-                  className={`btn ${view === "edit" ? "btn-primary" : "btn-outline-primary"}`}
-                  onClick={() => setView("edit")}
-                >
-                  Zmień dane
-                </button>
-                <button 
-                  className={`btn ${view === "addPlant" ? "btn-primary" : "btn-outline-primary"}`}
-                  onClick={() => setView("addPlant")}
-                >
-                  Dodaj roślinę
-                </button>
-                <button 
-                  className={`btn ${view === "swaps" ? "btn-primary" : "btn-outline-primary"}`}
-                  onClick={() => setView("swaps")}
-                >
-                  Moje wymiany
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-9">
-          {view === "profile" && (
-            <div className="card">
-              <div className="card-body">
-                <h3 className="card-title mb-4">Informacje o profilu</h3>
-                <div className="mb-3">
-                  <p className="mb-1"><strong>Email:</strong> {user.email}</p>
-                  <p className="mb-1"><strong>Lokalizacja:</strong> {user.location || "Brak"}</p>
-                  <p className="mb-1"><strong>Ostatnia aktywność:</strong> {user.last_activity}</p>
-                </div>
-
-                <h4 className="mt-4 mb-3">Twoje rośliny</h4>
-                {plants.length === 0 ? (
-                  <div className="alert alert-info">
-                    Nie dodałeś jeszcze żadnych roślin.
-                  </div>
-                ) : (
-                  <div className="row row-cols-1 row-cols-md-2 g-4">
-                    {plants.map((plant) => (
-                      <div key={plant.id} className="col">
-                        <div className="card h-100">
-                          {plant.photo_url && (
-                            <img
-                              src={plant.photo_url}
-                              className="card-img-top"
-                              alt={plant.name}
-                              style={{ height: "200px", objectFit: "cover" }}
-                            />
-                          )}
-                          <div className="card-body">
-                            <h5 className="card-title">{plant.name}</h5>
-                            <p className="card-text">{plant.description}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {view === "edit" && (
-            <div className="card">
-              <div className="card-body">
-                <h3 className="card-title mb-4">Edytuj dane</h3>
-                <form onSubmit={handleEditSubmit}>
-                  <div className="mb-3">
-                    <label className="form-label">Nazwa użytkownika</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="username"
-                      value={editData.username}
-                      onChange={handleEditChange}
-                      placeholder="Nazwa użytkownika"
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Email</label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      name="email"
-                      value={editData.email}
-                      onChange={handleEditChange}
-                      placeholder="Email"
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Lokalizacja</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="location"
-                      value={editData.location || ""}
-                      onChange={handleEditChange}
-                      placeholder="Lokalizacja"
-                    />
-                  </div>
-                  <button type="submit" className="btn btn-primary">
-                    Zapisz zmiany
-                  </button>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {view === "addPlant" && (
-            <div className="card">
-              <div className="card-body">
-                <h3 className="card-title mb-4">Dodaj nową roślinę</h3>
-                <form onSubmit={handleAddPlant}>
-                  <div className="mb-3">
-                    <label className="form-label">Nazwa rośliny</label>
-                    <input 
-                      name="plantName" 
-                      className="form-control"
-                      placeholder="Nazwa rośliny" 
-                      required 
-                      value={editData.plantName || ""}
-                      onChange={handleEditChange}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Opis</label>
-                    <textarea 
-                      name="plantDescription" 
-                      className="form-control"
-                      placeholder="Opis" 
-                      value={editData.plantDescription || ""}
-                      onChange={handleEditChange}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Zdjęcie</label>
-                    <input 
-                      type="file" 
-                      className="form-control"
-                      name="image" 
-                      accept="image/*" 
-                      onChange={handleImageChange} 
-                    />
-                  </div>
-                  <button type="submit" className="btn btn-primary">
-                    Dodaj
-                  </button>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {view === "swaps" && (
-            <div className="card">
-              <div className="card-body">
-                <h3 className="card-title mb-4">Moje wymiany</h3>
-                {swaps.length === 0 ? (
-                  <div className="alert alert-info">
-                    Brak propozycji wymian.
-                  </div>
-                ) : (
-                  <div className="list-group">
-                    {swaps.map((swap) => (
-                      <div key={swap.id} className="list-group-item">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <div>
-                            <h5 className="mb-1">Wymiana #{swap.id}</h5>
-                            <p className="mb-1">
-                              <strong>Oferujesz:</strong> {swap.offered_plant_name}
-                            </p>
-                            <p className="mb-1">
-                              <strong>Chcesz otrzymać:</strong> {swap.requested_plant_name}
-                            </p>
-                            <p className="mb-1">
-                              <strong>Status:</strong> {translateStatus(swap.status)}
-                            </p>
-                            <p className="mb-1">
-                              <strong>Data:</strong> {new Date(swap.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
-                          {swap.status === "pending" && swap.requested_plant_owner_id === Number(user.id) && (
-                            <div className="btn-group">
-                              <button
-                                className="btn btn-success"
-                                onClick={() => handleSwapAction(swap.id, "accepted")}
-                              >
-                                Akceptuj
-                              </button>
-                              <button
-                                className="btn btn-danger"
-                                onClick={() => handleSwapAction(swap.id, "rejected")}
-                              >
-                                Odrzuć
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          <button
+            style={{
+              background: "#bfc0c5",
+              color: "#fff",
+              fontSize: 28,
+              border: "none",
+              borderRadius: 30,
+              padding: "8px 36px",
+              fontWeight: 400,
+              cursor: "pointer",
+              boxShadow: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              opacity: 0.7
+            }}
+            onClick={() => setView("edit")}
+          >
+            Zmień dane
+          </button>
+          <button
+            style={{
+              background: "#bfc0c5",
+              color: "#fff",
+              fontSize: 28,
+              border: "none",
+              borderRadius: 30,
+              padding: "8px 36px",
+              fontWeight: 400,
+              cursor: "pointer",
+              boxShadow: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              opacity: 0.7
+            }}
+            onClick={() => setView("swaps")}
+          >
+            Moje wymiany
+          </button>
+          <button
+            style={{
+              background: "#fff",
+              color: "#bfc0c5",
+              fontSize: 22,
+              border: "1px solid #bfc0c5",
+              borderRadius: 18,
+              padding: "6px 24px",
+              fontWeight: 500,
+              cursor: "pointer",
+              marginLeft: 18,
+              boxShadow: "none",
+              transition: "background 0.2s",
+            }}
+            onClick={onLogout}
+          >
+            Wyloguj
+          </button>
         </div>
       </div>
+
+      {/* Main content */}
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-start", gap: 40, marginTop: 50 }}>
+        {/* Main rounded box */}
+        <div style={{ background: "#d6d6d6", borderRadius: 60, padding: 40, minWidth: 800, maxWidth: 900, flex: 1, boxShadow: "0 2px 8px #bbb" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 18 }}>
+            <span style={{ fontSize: 38, background: "#bfc0c5", color: "#fff", borderRadius: 30, padding: "4px 32px", fontWeight: 600, display: "flex", alignItems: "center" }}>😊 {user.username}</span>
+          </div>
+          <div style={{ fontSize: 24, color: "#555", fontWeight: 400, marginBottom: 18 }}>Moje Rośliny</div>
+          <div style={{ background: "#ededed", borderRadius: 12, padding: 24, minHeight: 220, border: "1.5px solid #bbb", marginBottom: 18 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 32 }}>
+              {plants.map((plant) => (
+                <div key={plant.id} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  {plant.photo_url && (
+                    <img src={plant.photo_url} alt={plant.name} style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 16, marginBottom: 8 }} />
+                  )}
+                  <div style={{ fontSize: 20, color: "#444", fontWeight: 500, marginTop: 4 }}>{plant.name}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        {/* Right panel */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 40, minWidth: 320, alignItems: "center", marginTop: 20 }}>
+          <button
+            style={{
+              background: "#bfc0c5",
+              color: "#fff",
+              fontSize: 38,
+              border: "none",
+              borderRadius: 36,
+              padding: "16px 40px",
+              fontWeight: 600,
+              cursor: "pointer",
+              boxShadow: "none",
+              transition: "background 0.2s",
+              opacity: 0.7,
+              width: 320,
+              marginBottom: 20
+            }}
+            onClick={() => setView("addPlant")}
+          >
+            <span style={{ fontSize: 38, marginRight: 12 }}>＋</span>Dodaj ogłoszenie
+          </button>
+          <button
+            style={{
+              background: "#bfc0c5",
+              color: "#fff",
+              fontSize: 38,
+              border: "none",
+              borderRadius: 36,
+              padding: "16px 40px",
+              fontWeight: 600,
+              cursor: "not-allowed",
+              boxShadow: "none",
+              transition: "background 0.2s",
+              opacity: 0.7,
+              width: 320
+            }}
+            disabled
+          >
+            <span style={{ fontSize: 38, marginRight: 12 }}>♕</span>Pomoc
+          </button>
+        </div>
+      </div>
+
+      {/* Pozostałe widoki (edycja, dodawanie, wymiany) */}
+      {view === "edit" && (
+        <div style={{ maxWidth: 600, margin: "40px auto", background: "#fff", borderRadius: 24, boxShadow: "0 2px 8px #bbb", padding: 32 }}>
+          <h3 style={{ fontSize: 32, fontWeight: 600, marginBottom: 24 }}>Edytuj dane</h3>
+          <form onSubmit={handleEditSubmit}>
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ fontWeight: 500 }}>Nazwa użytkownika</label>
+              <input
+                type="text"
+                name="username"
+                value={editData.username}
+                onChange={handleEditChange}
+                style={{ width: "100%", fontSize: 22, borderRadius: 16, border: "1.5px solid #bfc0c5", padding: "8px 18px", marginTop: 6 }}
+              />
+            </div>
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ fontWeight: 500 }}>Email</label>
+              <input
+                type="email"
+                name="email"
+                value={editData.email}
+                onChange={handleEditChange}
+                style={{ width: "100%", fontSize: 22, borderRadius: 16, border: "1.5px solid #bfc0c5", padding: "8px 18px", marginTop: 6 }}
+              />
+            </div>
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ fontWeight: 500 }}>Lokalizacja</label>
+              <input
+                type="text"
+                name="location"
+                value={editData.location || ""}
+                onChange={handleEditChange}
+                style={{ width: "100%", fontSize: 22, borderRadius: 16, border: "1.5px solid #bfc0c5", padding: "8px 18px", marginTop: 6 }}
+              />
+            </div>
+            <button type="submit" style={{ fontSize: 24, borderRadius: 16, background: "#bfc0c5", color: "#fff", border: "none", padding: "10px 36px", fontWeight: 600, marginTop: 10 }}>Zapisz zmiany</button>
+          </form>
+        </div>
+      )}
+      {view === "addPlant" && (
+        <div style={{ maxWidth: 600, margin: "40px auto", background: "#fff", borderRadius: 24, boxShadow: "0 2px 8px #bbb", padding: 32 }}>
+          <h3 style={{ fontSize: 32, fontWeight: 600, marginBottom: 24 }}>Dodaj nową roślinę</h3>
+          <form onSubmit={handleAddPlant}>
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ fontWeight: 500 }}>Nazwa rośliny</label>
+              <input
+                name="plantName"
+                className="form-control"
+                placeholder="Nazwa rośliny"
+                required
+                value={editData.plantName || ""}
+                onChange={handleEditChange}
+                style={{ width: "100%", fontSize: 22, borderRadius: 16, border: "1.5px solid #bfc0c5", padding: "8px 18px", marginTop: 6 }}
+              />
+            </div>
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ fontWeight: 500 }}>Opis</label>
+              <textarea
+                name="plantDescription"
+                className="form-control"
+                placeholder="Opis"
+                value={editData.plantDescription || ""}
+                onChange={handleEditChange}
+                style={{ width: "100%", fontSize: 22, borderRadius: 16, border: "1.5px solid #bfc0c5", padding: "8px 18px", marginTop: 6 }}
+              />
+            </div>
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ fontWeight: 500 }}>Zdjęcie</label>
+              <input
+                type="file"
+                className="form-control"
+                name="image"
+                accept="image/*"
+                onChange={handleImageChange}
+                style={{ width: "100%", fontSize: 22, borderRadius: 16, border: "1.5px solid #bfc0c5", padding: "8px 18px", marginTop: 6 }}
+              />
+            </div>
+            <button type="submit" style={{ fontSize: 24, borderRadius: 16, background: "#bfc0c5", color: "#fff", border: "none", padding: "10px 36px", fontWeight: 600, marginTop: 10 }}>Dodaj</button>
+          </form>
+        </div>
+      )}
+      {view === "swaps" && (
+        <div style={{ maxWidth: 700, margin: "40px auto", background: "#fff", borderRadius: 24, boxShadow: "0 2px 8px #bbb", padding: 32 }}>
+          <h3 style={{ fontSize: 32, fontWeight: 600, marginBottom: 24 }}>Moje wymiany</h3>
+          {swaps.length === 0 ? (
+            <div style={{ fontSize: 20, color: "#888" }}>Brak propozycji wymian.</div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+              {swaps.map((swap) => (
+                <div key={swap.id} style={{ background: "#ededed", borderRadius: 16, padding: 18, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 20 }}>Wymiana #{swap.id}</div>
+                    <div><strong>Oferujesz:</strong> {swap.offered_plant_name}</div>
+                    <div><strong>Chcesz otrzymać:</strong> {swap.requested_plant_name}</div>
+                    <div><strong>Status:</strong> {translateStatus(swap.status)}</div>
+                    <div><strong>Data:</strong> {new Date(swap.created_at).toLocaleDateString()}</div>
+                  </div>
+                  {swap.status === "pending" && swap.requested_plant_owner_id === Number(user.id) && (
+                    <div style={{ display: "flex", gap: 10 }}>
+                      <button
+                        style={{ background: "#7ed957", color: "#fff", border: "none", borderRadius: 10, padding: "8px 24px", fontWeight: 600, fontSize: 18, cursor: "pointer" }}
+                        onClick={() => handleSwapAction(swap.id, "accepted")}
+                      >
+                        Akceptuj
+                      </button>
+                      <button
+                        style={{ background: "#e57373", color: "#fff", border: "none", borderRadius: 10, padding: "8px 24px", fontWeight: 600, fontSize: 18, cursor: "pointer" }}
+                        onClick={() => handleSwapAction(swap.id, "rejected")}
+                      >
+                        Odrzuć
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
