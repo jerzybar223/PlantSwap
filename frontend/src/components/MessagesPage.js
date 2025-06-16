@@ -138,46 +138,77 @@ function MessagesPage({ user, token }) {
   });
 
   return (
-    <div className="container py-4">
-      <nav className="navbar navbar-expand-lg navbar-light bg-light mb-4">
-        <div className="container-fluid">
-          <button 
-            className="btn btn-link text-decoration-none" 
-            onClick={() => navigate("/")}
-          >
-            <i className="bi bi-flower1 fs-1"></i>
-            <span className="h3 ms-2">PlantSwap</span>
-          </button>
+    <div style={{ minHeight: "100vh", background: "#ededed" }}>
+      {/* Header */}
+      <div style={{ background: "#bfc0c5", height: 110, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 60px 0 40px", boxShadow: "0 2px 8px #bbb" }}>
+        <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => navigate("/") }>
+          <svg width="90" height="70" viewBox="0 0 90 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="45" cy="35" rx="35" ry="22" fill="#b9e3c6" />
+            <path d="M45 15 Q52 35 75 35 Q52 35 45 55 Q38 35 15 35 Q38 35 45 15 Z" fill="#a3b6e3" />
+          </svg>
+          <span style={{ fontFamily: 'Arial Rounded MT Bold, Arial, sans-serif', fontSize: 48, color: '#7ed957', marginLeft: 18, letterSpacing: 2, textShadow: '1px 1px 2px #888' }}>
+            FloraSoft
+          </span>
         </div>
-      </nav>
+        <button
+          style={{
+            background: "#fff",
+            color: "#bfc0c5",
+            fontSize: 22,
+            border: "1px solid #bfc0c5",
+            borderRadius: 18,
+            padding: "6px 24px",
+            fontWeight: 500,
+            cursor: "pointer",
+            marginLeft: 18,
+            boxShadow: "none",
+            transition: "background 0.2s",
+          }}
+          onClick={() => { localStorage.removeItem('token'); window.location.reload(); }}
+        >
+          Wyloguj
+        </button>
+      </div>
 
-      <div className="row">
-        <div className="col-md-4">
-          <div className="card">
-            <div className="card-header">
-              <h5 className="card-title mb-0">Konwersacje</h5>
+      <div className="row" style={{ margin: 0, marginTop: 40, justifyContent: 'center' }}>
+        <div className="col-md-4" style={{ minWidth: 340, maxWidth: 400 }}>
+          <div style={{ background: "#d6d6d6", borderRadius: 40, boxShadow: "0 2px 8px #bbb", padding: 0 }}>
+            <div style={{ background: "#bfc0c5", borderTopLeftRadius: 40, borderTopRightRadius: 40, padding: "18px 32px" }}>
+              <h5 style={{ margin: 0, fontSize: 28, color: '#fff', fontWeight: 600 }}>Konwersacje</h5>
             </div>
-            <div className="list-group list-group-flush">
+            <div style={{ padding: 0 }}>
               {sortedUsers.map((u) => (
                 <button
                   key={u.id}
-                  className={`list-group-item list-group-item-action ${
-                    selectedUser?.id === u.id ? "active" : ""
-                  }`}
+                  style={{
+                    background: selectedUser?.id === u.id ? "#bfc0c5" : "#ededed",
+                    color: selectedUser?.id === u.id ? "#fff" : "#888",
+                    border: 'none',
+                    borderBottom: '1px solid #e0e0e0',
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '18px 32px',
+                    fontSize: 22,
+                    fontWeight: 500,
+                    borderRadius: 0,
+                    outline: 'none',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s',
+                    borderTopLeftRadius: 0,
+                    borderTopRightRadius: 0,
+                  }}
                   onClick={() => setSelectedUser(u)}
                 >
-                  <div className="d-flex align-items-center">
-                    <div className="flex-grow-1">
-                      <h6 className="mb-0">{u.username}</h6>
-                      <div className="d-flex justify-content-between align-items-center">
-                        <small className="text-muted">{u.location || "Brak lokalizacji"}</small>
-                        {lastMessageDates[u.id] && (
-                          <small className="text-muted ms-2">
-                            {formatDate(lastMessageDates[u.id])}
-                          </small>
-                        )}
-                      </div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: 22 }}>{u.username}</div>
+                      <div style={{ fontSize: 15, color: '#bfc0c5', marginTop: 2 }}>{u.location || "Brak lokalizacji"}</div>
                     </div>
+                    {lastMessageDates[u.id] && (
+                      <div style={{ fontSize: 15, color: '#bfc0c5', marginLeft: 10 }}>
+                        {formatDate(lastMessageDates[u.id])}
+                      </div>
+                    )}
                   </div>
                 </button>
               ))}
@@ -185,63 +216,79 @@ function MessagesPage({ user, token }) {
           </div>
         </div>
 
-        <div className="col-md-8">
+        <div className="col-md-8" style={{ minWidth: 500, maxWidth: 800 }}>
           {selectedUser ? (
-            <div className="card">
-              <div className="card-header">
-                <h5 className="card-title mb-0">
+            <div style={{ background: "#d6d6d6", borderRadius: 40, boxShadow: "0 2px 8px #bbb" }}>
+              <div style={{ background: "#bfc0c5", borderTopLeftRadius: 40, borderTopRightRadius: 40, padding: "18px 32px" }}>
+                <h5 style={{ margin: 0, fontSize: 28, color: '#fff', fontWeight: 600 }}>
                   Rozmowa z {selectedUser.username}
                 </h5>
               </div>
-              <div className="card-body">
-                <div className="messages-container" style={{ height: "400px", overflowY: "auto" }}>
+              <div style={{ padding: 32 }}>
+                <div style={{ height: "400px", overflowY: "auto", background: "#ededed", borderRadius: 20, padding: 18, marginBottom: 24 }}>
                   {messages.map((message) => (
                     <div
                       key={message.id}
-                      className={`d-flex mb-3 ${
-                        message.sender === user.id ? "justify-content-end" : "justify-content-start"
-                      }`}
+                      style={{ display: 'flex', justifyContent: message.sender === user.id ? 'flex-end' : 'flex-start', marginBottom: 18 }}
                     >
                       <div
-                        className={`message p-3 rounded ${
-                          message.sender === user.id
-                            ? "bg-primary text-white"
-                            : "bg-light"
-                        }`}
-                        style={{ maxWidth: "70%" }}
+                        style={{
+                          background: message.sender === user.id ? '#7ed957' : '#fff',
+                          color: message.sender === user.id ? '#fff' : '#444',
+                          borderRadius: 18,
+                          padding: '14px 28px',
+                          fontSize: 20,
+                          maxWidth: '70%',
+                          boxShadow: '0 1px 4px #bbb',
+                          wordBreak: 'break-word',
+                        }}
                       >
-                        <div className="message-content">{message.content}</div>
-                        <small className="text-muted d-block mt-1">
-                          {formatDate(message.sent_at)}
-                        </small>
+                        <div>{message.content}</div>
+                        <div style={{ fontSize: 13, color: '#bfc0c5', marginTop: 6, textAlign: 'right' }}>{formatDate(message.sent_at)}</div>
                       </div>
                     </div>
                   ))}
                 </div>
-                <form onSubmit={handleSendMessage} className="mt-3">
-                  <div className="input-group">
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      placeholder="Napisz wiadomość..."
-                    />
-                    <button type="submit" className="btn btn-primary">
-                      Wyślij
-                    </button>
-                  </div>
+                <form onSubmit={handleSendMessage} style={{ display: 'flex', gap: 16 }}>
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Napisz wiadomość..."
+                    style={{
+                      flex: 1,
+                      fontSize: 22,
+                      borderRadius: 18,
+                      border: '1.5px solid #bfc0c5',
+                      padding: '12px 24px',
+                      outline: 'none',
+                      fontWeight: 400,
+                      background: '#fff',
+                    }}
+                  />
+                  <button type="submit" style={{
+                    background: '#bfc0c5',
+                    color: '#fff',
+                    fontSize: 22,
+                    border: 'none',
+                    borderRadius: 18,
+                    padding: '12px 36px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    boxShadow: 'none',
+                    transition: 'background 0.2s',
+                  }}>
+                    Wyślij
+                  </button>
                 </form>
               </div>
             </div>
           ) : (
-            <div className="card">
-              <div className="card-body text-center">
-                <h5 className="card-title">Wybierz konwersację</h5>
-                <p className="card-text">
-                  Wybierz użytkownika z listy po lewej stronie, aby rozpocząć rozmowę.
-                </p>
-              </div>
+            <div style={{ background: "#d6d6d6", borderRadius: 40, boxShadow: "0 2px 8px #bbb", padding: 60, textAlign: 'center' }}>
+              <h5 style={{ fontSize: 28, color: '#bfc0c5', fontWeight: 600 }}>Wybierz konwersację</h5>
+              <p style={{ fontSize: 20, color: '#888' }}>
+                Wybierz użytkownika z listy po lewej stronie, aby rozpocząć rozmowę.
+              </p>
             </div>
           )}
         </div>
