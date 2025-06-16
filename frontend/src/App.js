@@ -332,7 +332,14 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage user={user} token={token} onLogout={handleLogout} />} />
         <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
-        <Route path="/register" element={<RegisterPage onRegister={handleRegister} />} />
+        <Route path="/register" element={
+          <RegisterPage
+            formData={formData}
+            onChange={handleChange}
+            onRegister={handleRegister}
+            switchToLogin={() => navigate("/login")}
+          />
+        } />
         <Route
           path="/profile"
           element={

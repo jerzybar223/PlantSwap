@@ -297,6 +297,8 @@ function UserProfile({ user, token, onLogout }) {
                       className="form-control"
                       placeholder="Nazwa rośliny" 
                       required 
+                      value={editData.plantName || ""}
+                      onChange={handleEditChange}
                     />
                   </div>
                   <div className="mb-3">
@@ -305,6 +307,8 @@ function UserProfile({ user, token, onLogout }) {
                       name="plantDescription" 
                       className="form-control"
                       placeholder="Opis" 
+                      value={editData.plantDescription || ""}
+                      onChange={handleEditChange}
                     />
                   </div>
                   <div className="mb-3">
