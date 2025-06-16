@@ -166,8 +166,8 @@ function MessagesPage({ user, token }) {
 
       <div className="row" style={{ margin: 0, marginTop: 40, justifyContent: 'center' }}>
         <div className="col-md-4" style={{ minWidth: 340, maxWidth: 400 }}>
-          <div style={{ background: "#d6d6d6", borderRadius: 40, boxShadow: "0 2px 8px #bbb", padding: 0 }}>
-            <div style={{ background: "#bfc0c5", borderTopLeftRadius: 40, borderTopRightRadius: 40, padding: "18px 32px" }}>
+          <div style={{ background: "#b0b4ba", borderRadius: 40, boxShadow: "0 2px 8px #bbb", padding: 0 }}>
+            <div style={{ background: "#7e8ba3", borderTopLeftRadius: 40, borderTopRightRadius: 40, padding: "18px 32px" }}>
               <h5 style={{ margin: 0, fontSize: 28, color: '#fff', fontWeight: 600 }}>Konwersacje</h5>
             </div>
             <div style={{ padding: 0 }}>
@@ -175,8 +175,8 @@ function MessagesPage({ user, token }) {
                 <button
                   key={u.id}
                   style={{
-                    background: selectedUser?.id === u.id ? "#bfc0c5" : "#ededed",
-                    color: selectedUser?.id === u.id ? "#fff" : "#888",
+                    background: selectedUser?.id === u.id ? "#7e8ba3" : "#f2f4f8",
+                    color: selectedUser?.id === u.id ? "#fff" : "#444",
                     border: 'none',
                     borderBottom: '1px solid #e0e0e0',
                     width: '100%',
@@ -196,10 +196,10 @@ function MessagesPage({ user, token }) {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div>
                       <div style={{ fontWeight: 600, fontSize: 22 }}>{u.username}</div>
-                      <div style={{ fontSize: 15, color: '#bfc0c5', marginTop: 2 }}>{u.location || "Brak lokalizacji"}</div>
+                      <div style={{ fontSize: 15, color: '#7e8ba3', marginTop: 2 }}>{u.location || "Brak lokalizacji"}</div>
                     </div>
                     {lastMessageDates[u.id] && (
-                      <div style={{ fontSize: 15, color: '#bfc0c5', marginLeft: 10 }}>
+                      <div style={{ fontSize: 15, color: '#7e8ba3', marginLeft: 10 }}>
                         {formatDate(lastMessageDates[u.id])}
                       </div>
                     )}
@@ -212,14 +212,14 @@ function MessagesPage({ user, token }) {
 
         <div className="col-md-8" style={{ minWidth: 500, maxWidth: 800 }}>
           {selectedUser ? (
-            <div style={{ background: "#d6d6d6", borderRadius: 40, boxShadow: "0 2px 8px #bbb" }}>
-              <div style={{ background: "#bfc0c5", borderTopLeftRadius: 40, borderTopRightRadius: 40, padding: "18px 32px" }}>
+            <div style={{ background: "#f7f7fa", borderRadius: 40, boxShadow: "0 2px 8px #bbb" }}>
+              <div style={{ background: "#7e8ba3", borderTopLeftRadius: 40, borderTopRightRadius: 40, padding: "18px 32px" }}>
                 <h5 style={{ margin: 0, fontSize: 28, color: '#fff', fontWeight: 600 }}>
                   Rozmowa z {selectedUser.username}
                 </h5>
               </div>
               <div style={{ padding: 32 }}>
-                <div style={{ height: "400px", overflowY: "auto", background: "#ededed", borderRadius: 20, padding: 18, marginBottom: 24 }}>
+                <div style={{ height: "400px", overflowY: "auto", background: "#f2f4f8", borderRadius: 20, padding: 18, marginBottom: 24 }}>
                   {messages.map((message) => (
                     <div
                       key={message.id}
@@ -228,7 +228,7 @@ function MessagesPage({ user, token }) {
                       <div
                         style={{
                           background: message.sender === user.id ? '#7ed957' : '#fff',
-                          color: message.sender === user.id ? '#fff' : '#444',
+                          color: message.sender === user.id ? '#fff' : '#222',
                           borderRadius: 18,
                           padding: '14px 28px',
                           fontSize: 20,
@@ -238,7 +238,7 @@ function MessagesPage({ user, token }) {
                         }}
                       >
                         <div>{message.content}</div>
-                        <div style={{ fontSize: 13, color: '#bfc0c5', marginTop: 6, textAlign: 'right' }}>{formatDate(message.sent_at)}</div>
+                        <div style={{ fontSize: 13, color: '#7e8ba3', marginTop: 6, textAlign: 'right' }}>{formatDate(message.sent_at)}</div>
                       </div>
                     </div>
                   ))}
@@ -253,7 +253,7 @@ function MessagesPage({ user, token }) {
                       flex: 1,
                       fontSize: 22,
                       borderRadius: 18,
-                      border: '1.5px solid #bfc0c5',
+                      border: '1.5px solid #7e8ba3',
                       padding: '12px 24px',
                       outline: 'none',
                       fontWeight: 400,
@@ -261,7 +261,7 @@ function MessagesPage({ user, token }) {
                     }}
                   />
                   <button type="submit" style={{
-                    background: '#bfc0c5',
+                    background: '#7e8ba3',
                     color: '#fff',
                     fontSize: 22,
                     border: 'none',
@@ -278,8 +278,8 @@ function MessagesPage({ user, token }) {
               </div>
             </div>
           ) : (
-            <div style={{ background: "#d6d6d6", borderRadius: 40, boxShadow: "0 2px 8px #bbb", padding: 60, textAlign: 'center' }}>
-              <h5 style={{ fontSize: 28, color: '#bfc0c5', fontWeight: 600 }}>Wybierz konwersację</h5>
+            <div style={{ background: "#f7f7fa", borderRadius: 40, boxShadow: "0 2px 8px #bbb", padding: 60, textAlign: 'center' }}>
+              <h5 style={{ fontSize: 28, color: '#7e8ba3', fontWeight: 600 }}>Wybierz konwersację</h5>
               <p style={{ fontSize: 20, color: '#888' }}>
                 Wybierz użytkownika z listy po lewej stronie, aby rozpocząć rozmowę.
               </p>
