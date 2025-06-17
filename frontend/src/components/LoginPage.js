@@ -25,7 +25,7 @@ function LoginPage({ onLogin }) {
       {/* Top bar */}
       <div style={{ background: "#bfc0c5", height: 110, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 60px 0 40px", boxShadow: "0 2px 8px #bbb", position: "relative", overflow: "visible" }}>
         <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }} onClick={() => navigate("/") }>
-          <img src={require("../logoflora.png")} alt="FloraSoft logo" style={{ height: 400, width: "auto", marginRight: 18, position: "absolute", left: 0, top: -145 }} />
+          <img src={require("../logoflora.png")} alt="FloraSoft logo" style={{ height: 360, width: "auto", marginRight: 18, position: "absolute", left: 0, top: -113 }} />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
           <button

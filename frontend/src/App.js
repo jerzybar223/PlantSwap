@@ -57,7 +57,7 @@ function HomePage({ user, token, onLogout }) {
       {/* Header */}
       <div style={{ background: "#bfc0c5", height: 110, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 60px 0 40px", boxShadow: "0 2px 8px #bbb", position: "relative", overflow: "visible" }}>
         <div style={{ display: "flex", alignItems: "center" }}>
-          <img src={require("./logoflora.png")} alt="FloraSoft logo" style={{ height: 400, width: "auto", marginRight: 18, cursor: "pointer", position: "absolute", left: 0, top: -145 }} onClick={() => navigate("/")} />
+          <img src={require("./logoflora.png")} alt="FloraSoft logo" style={{ height: 360, width: "auto", marginRight: 18, cursor: "pointer", position: "absolute", left: 0, top: -113 }} onClick={() => navigate("/")} />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
           <button
@@ -124,11 +124,8 @@ function HomePage({ user, token, onLogout }) {
       </div>
 
       {/* Main board */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 60, marginTop: 50 }}>
-        {/* Najnowsze */}
-        <div style={{ width: 520 }}>
-          {/* <h2 style={{ color: "#bfc0c5", fontSize: 44, fontWeight: 400, marginBottom: 10, marginLeft: 10, letterSpacing: 1 }}>Najnowsze</h2> */}
-          {/* <hr style={{ border: 0, borderTop: "2px solid #e0e0e0", marginBottom: 36 }} /> */}
+      <div style={{ maxWidth: 1200, margin: "50px auto 0 auto", padding: "0 20px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 40 }}>
           {recentPlants.map((plant) => (
             <div key={plant.id} style={{
               display: "flex",
@@ -151,8 +148,8 @@ function HomePage({ user, token, onLogout }) {
                 />
               )}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 36, fontWeight: 700, color: "#444", marginBottom: 6, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 220 }}>{plant.name}</div>
-                <div style={{ fontSize: 18, color: "#555", marginBottom: 8, lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 220 }}>{plant.description}</div>
+                <div style={{ fontSize: 36, fontWeight: 700, color: "#444", marginBottom: 6, overflow: "hidden", textOverflow: "ellipsis" }}>{plant.name}</div>
+                <div style={{ fontSize: 18, color: "#555", marginBottom: 8, lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis" }}>{plant.description}</div>
                 <div style={{ fontSize: 20, color: "#b48e9c", fontWeight: 700, display: "flex", alignItems: "center" }}>
                   <span style={{ fontSize: 20, marginRight: 6 }}>📍</span><span style={{fontWeight: 700}}>{plant.location || "Rzeszów"}</span>
                 </div>
@@ -172,66 +169,7 @@ function HomePage({ user, token, onLogout }) {
                     marginLeft: "auto",
                     boxShadow: "none",
                     transition: "background 0.2s",
-                    maxWidth: 160,
-                    minWidth: 120,
-                    whiteSpace: "nowrap",
-                    flexShrink: 0
-                  }}
-                >
-                  Wymień
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-        {/* Popularne */}
-        <div style={{ width: 520 }}>
-          {/* <h2 style={{ color: "#bfc0c5", fontSize: 44, fontWeight: 400, marginBottom: 10, marginLeft: 10, letterSpacing: 1 }}>Popularne</h2> */}
-          {/* <hr style={{ border: 0, borderTop: "2px solid #e0e0e0", marginBottom: 36 }} /> */}
-          {recentPlants.map((plant) => (
-            <div key={plant.id} style={{
-              display: "flex",
-              alignItems: "center",
-              background: "#d6d6d6",
-              borderRadius: 48,
-              marginBottom: 38,
-              padding: 24,
-              boxShadow: "none",
-              minHeight: 140,
-              gap: 24,
-              flexWrap: "wrap",
-              overflow: "hidden"
-            }}>
-              {plant.photo_url && (
-                <img
-                  src={plant.photo_url}
-                  alt={plant.name}
-                  style={{ width: 120, height: 90, objectFit: "cover", borderRadius: 20, marginRight: 18, flexShrink: 0 }}
-                />
-              )}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 36, fontWeight: 700, color: "#444", marginBottom: 6, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 220 }}>{plant.name}</div>
-                <div style={{ fontSize: 18, color: "#555", marginBottom: 8, lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 220 }}>{plant.description}</div>
-                <div style={{ fontSize: 20, color: "#b48e9c", fontWeight: 700, display: "flex", alignItems: "center" }}>
-                  <span style={{ fontSize: 20, marginRight: 6 }}>📍</span><span style={{fontWeight: 700}}>{plant.location || "Rzeszów"}</span>
-                </div>
-              </div>
-              {user && plant.user !== user.id && (
-                <button
-                  onClick={() => openSwapModal(plant)}
-                  style={{
-                    background: "#b6ef9b",
-                    color: "#fff",
-                    fontSize: 24,
-                    border: "none",
-                    borderRadius: 30,
-                    padding: "8px 32px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    marginLeft: "auto",
-                    boxShadow: "none",
-                    transition: "background 0.2s",
-                    maxWidth: 160,
+                    maxWidth: "100%",
                     minWidth: 120,
                     whiteSpace: "nowrap",
                     flexShrink: 0
@@ -246,28 +184,40 @@ function HomePage({ user, token, onLogout }) {
       </div>
 
       {requestedPlant && (
-        <div className="modal fade show" style={{ display: "block" }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  Proponujesz wymianę za: <strong>{requestedPlant.name}</strong>
+        <div className="modal fade show" style={{ display: "block", background: "rgba(0, 0, 0, 0.5)" }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content" style={{ borderRadius: 40, boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)" }}>
+              <div className="modal-header" style={{ background: "#7e8ba3", borderTopLeftRadius: 40, borderTopRightRadius: 40, padding: "18px 32px", borderBottom: "none" }}>
+                <h5 className="modal-title" style={{ margin: 0, fontSize: 28, color: '#fff', fontWeight: 600 }}>
+                  Proponujesz wymianę za: <strong style={{ color: '#fff' }}>{requestedPlant.name}</strong>
                 </h5>
                 <button 
                   type="button" 
                   className="btn-close" 
                   onClick={() => setRequestedPlant(null)}
+                  style={{ filter: "invert(1)", opacity: 0.8 }}
                 ></button>
               </div>
-              <div className="modal-body">
+              <div className="modal-body" style={{ padding: 32, background: "#f7f7fa", borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}>
                 <div className="mb-3">
-                  <label className="form-label">Wybierz jedną ze swoich roślin:</label>
+                  <label className="form-label" style={{ fontSize: 22, fontWeight: 500, color: "#444", marginBottom: 10 }}>Wybierz jedną ze swoich roślin:</label>
                   <select
                     className="form-select"
                     value={selectedPlantToSwap?.id || ""}
                     onChange={(e) => {
                       const selected = userPlants.find((p) => p.id === parseInt(e.target.value));
                       setSelectedPlantToSwap(selected);
+                    }}
+                    style={{
+                      fontSize: 22,
+                      borderRadius: 18,
+                      border: '1.5px solid #7e8ba3',
+                      padding: '12px 24px',
+                      outline: 'none',
+                      fontWeight: 400,
+                      background: '#fff',
+                      width: '100%',
+                      boxShadow: "none"
                     }}
                   >
                     <option value="">-- wybierz --</option>
@@ -279,10 +229,22 @@ function HomePage({ user, token, onLogout }) {
                   </select>
                 </div>
               </div>
-              <div className="modal-footer">
+              <div className="modal-footer" style={{ background: "#f7f7fa", borderBottomLeftRadius: 40, borderBottomRightRadius: 40, padding: "24px 32px", borderTop: "none", display: "flex", justifyContent: "flex-end", gap: 15 }}>
                 <button 
                   className="btn btn-secondary" 
                   onClick={() => setRequestedPlant(null)}
+                  style={{
+                    background: "#e57373",
+                    color: "#fff",
+                    fontSize: 22,
+                    border: "none",
+                    borderRadius: 18,
+                    padding: "12px 36px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    boxShadow: "none",
+                    transition: "background 0.2s",
+                  }}
                 >
                   Anuluj
                 </button>
@@ -290,6 +252,19 @@ function HomePage({ user, token, onLogout }) {
                   className="btn btn-primary" 
                   onClick={submitSwap} 
                   disabled={!selectedPlantToSwap}
+                  style={{
+                    background: "#7ed957",
+                    color: "#fff",
+                    fontSize: 22,
+                    border: "none",
+                    borderRadius: 18,
+                    padding: "12px 36px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    boxShadow: "none",
+                    transition: "background 0.2s",
+                    opacity: selectedPlantToSwap ? 1 : 0.7
+                  }}
                 >
                   Zaproponuj wymianę
                 </button>
